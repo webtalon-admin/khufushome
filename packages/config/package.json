@@ -9,7 +9,8 @@
       "default": "./src/index.ts"
     },
     "./tsconfig/base": "./tsconfig/base.json",
-    "./tsconfig/react": "./tsconfig/react.json"
+    "./tsconfig/react": "./tsconfig/react.json",
+    "./tailwind/theme.css": "./tailwind/theme.css"
   },
   "scripts": {
     "lint": "biome lint .",
