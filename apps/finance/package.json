@@ -1,0 +1,13 @@
+{
+  "name": "@khufushome/finance",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"finance dev placeholder\"",
+    "build": "echo \"finance build placeholder\"",
+    "lint": "echo \"finance lint placeholder\"",
+    "typecheck": "echo \"finance typecheck placeholder\"",
+    "clean": "rm -rf dist"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@khufushome/threedimension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"threedimension dev placeholder\"",
+    "build": "echo \"threedimension build placeholder\"",
+    "lint": "echo \"threedimension lint placeholder\"",
+    "typecheck": "echo \"threedimension typecheck placeholder\"",
+    "clean": "rm -rf dist"
+  }
+}
