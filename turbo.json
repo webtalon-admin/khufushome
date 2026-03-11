@@ -1,19 +1,33 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local", ".npmrc"],
+  "globalEnv": ["KHUFUS_ENV"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "env": ["VITE_SUPABASE_URL", "VITE_SUPABASE_ANON_KEY"],
+      "outputs": ["dist/**", "node_modules/.tmp/**"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": []
+    },
+    "format": {
+      "outputs": []
+    },
+    "format:check": {
+      "outputs": []
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^typecheck"],
+      "outputs": ["node_modules/.tmp/**"]
     },
     "clean": {
       "cache": false
