@@ -1,2 +1,2 @@
-export type { AppEnvironment, KhufusEnv } from "@khufushome/types";
-export { getEnv } from "./env";
+export type { AppEnvironment, KhufusEnv } from "./env";
+export { getEnv, loadConfig, resetConfigCache } from "./env";
