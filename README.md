@@ -61,6 +61,7 @@ khufushome/
 
 - [Node.js](https://nodejs.org/) >= 20
 - [pnpm](https://pnpm.io/) (managed via corepack)
+- [Docker](https://docs.docker.com/get-docker/) (for Supabase local dev)
 
 ### Setup
 
@@ -77,6 +78,13 @@ pnpm install
 
 # Copy environment template and fill in your secrets
 cp .env.example .env.local
+
+# Start Supabase local stack (Postgres, Auth, Storage, Realtime)
+pnpm db:start
+# The output prints local API keys — copy them into .env.local
+
+# Apply migrations and seed data
+pnpm db:reset
 ```
 
 ### Development
@@ -126,6 +134,24 @@ pnpm format
 ```bash
 pnpm typecheck
 ```
+
+### Supabase Local Dev
+
+Supabase CLI runs a full local stack via Docker (Postgres, Auth, Storage, Realtime, Edge Functions).
+
+```bash
+pnpm db:start     # Spin up local Supabase (prints API keys)
+pnpm db:stop      # Tear down containers
+pnpm db:reset     # Re-apply all migrations + seed data
+pnpm db:status    # Show running services and ports
+```
+
+Test user credentials (created by seed):
+
+| Field | Value |
+|---|---|
+| Email | `dev@khufushome.local` |
+| Password | `password123` |
 
 ## Environment Configuration
 
