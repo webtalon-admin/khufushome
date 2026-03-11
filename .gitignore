@@ -1,9 +1,6 @@
 # Dependencies
 node_modules/
 
-# AI Stuff
-.cursor/
-
 # Build outputs
 dist/
 .next/
@@ -12,11 +9,17 @@ out/
 # Turbo
 .turbo/
 
-# Environment secrets
+# Environment secrets (NEVER commit these)
 .env.local
 .env.prod
 .env.*.local
 *.secret
+
+# Config (env.yaml is committed, secrets are not)
+# config/env.yaml is intentionally tracked
+
+# Supabase local
+.supabase/
 
 # OS
 .DS_Store
@@ -25,6 +28,7 @@ Thumbs.db
 # IDE
 .vscode/
 !.vscode/extensions.json
+.idea/
 *.swp
 *.swo
 
@@ -32,3 +36,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# TypeScript build info (cached by turbo)
+*.tsbuildinfo
+
+# Test coverage
+coverage/
