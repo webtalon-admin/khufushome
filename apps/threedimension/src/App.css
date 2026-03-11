@@ -1,8 +1,4 @@
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: system-ui, -apple-system, sans-serif;
-}
+@import "tailwindcss";
+@import "@khufushome/config/tailwind/theme.css";
+
+@source "../../../packages/ui";
