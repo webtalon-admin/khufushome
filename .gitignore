@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# AI Stuff
+.cursor/
+
 # Build outputs
 dist/
 .next/
