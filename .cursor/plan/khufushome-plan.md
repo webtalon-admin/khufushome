@@ -372,7 +372,7 @@ The `features.mock_devices: true` flag in `config/env.yaml` (local block) tells 
 - [x] Create `config/env.yaml` with `local` and `prod` environment blocks
 - [x] Build config loader in `packages/config/src/env.ts` with Zod schema validation
 - [x] Set up Supabase CLI local dev (`supabase init`, initial migration, seed file)
-- [ ] Create HA mock server stub in `packages/home-assistant/src/mock/`
+- [x] Create HA mock server stub in `packages/home-assistant/src/mock/`
 - [ ] Wire up `KHUFUS_ENV` env var switching: `pnpm dev` defaults to local, `KHUFUS_ENV=prod pnpm dev` uses prod config
 - [ ] Verify `turbo dev` runs all three apps concurrently on different ports
 
