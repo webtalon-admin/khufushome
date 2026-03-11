@@ -3,12 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
-    "build": "echo \"auth build placeholder\"",
-    "lint": "echo \"auth lint placeholder\"",
-    "typecheck": "echo \"auth typecheck placeholder\"",
+    "typecheck": "tsc -b",
     "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@khufushome/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
