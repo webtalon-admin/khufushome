@@ -1,2 +1,2 @@
-export { createAuthClient } from "./client";
 export type { AuthClient } from "./client";
+export { createAuthClient } from "./client";

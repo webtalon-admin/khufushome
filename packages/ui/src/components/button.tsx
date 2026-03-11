@@ -9,12 +9,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  * Shared button component. Will be replaced with shadcn/ui Button
  * once Tailwind CSS is configured in Phase 1.
  */
-export function Button({
-  variant = "primary",
-  size = "md",
-  children,
-  ...props
-}: ButtonProps) {
+export function Button({ variant = "primary", size = "md", children, ...props }: ButtonProps) {
   return (
     <button data-variant={variant} data-size={size} {...props}>
       {children}
