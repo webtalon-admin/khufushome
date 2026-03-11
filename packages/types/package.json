@@ -1,0 +1,14 @@
+{
+  "name": "@khufushome/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "echo \"types build placeholder\"",
+    "lint": "echo \"types lint placeholder\"",
+    "typecheck": "echo \"types typecheck placeholder\"",
+    "clean": "rm -rf dist"
+  }
+}

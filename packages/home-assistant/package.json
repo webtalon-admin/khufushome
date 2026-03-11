@@ -1,0 +1,14 @@
+{
+  "name": "@khufushome/home-assistant",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "echo \"home-assistant build placeholder\"",
+    "lint": "echo \"home-assistant lint placeholder\"",
+    "typecheck": "echo \"home-assistant typecheck placeholder\"",
+    "clean": "rm -rf dist"
+  }
+}

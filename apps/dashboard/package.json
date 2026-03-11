@@ -1,0 +1,13 @@
+{
+  "name": "@khufushome/dashboard",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"dashboard dev placeholder\"",
+    "build": "echo \"dashboard build placeholder\"",
+    "lint": "echo \"dashboard lint placeholder\"",
+    "typecheck": "echo \"dashboard typecheck placeholder\"",
+    "clean": "rm -rf dist"
+  }
+}
