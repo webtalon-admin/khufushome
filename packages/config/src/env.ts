@@ -8,9 +8,9 @@ import type { KhufusEnv } from "@khufushome/types";
  * will be implemented in a later phase once dependencies are added.
  */
 export function getEnv(): KhufusEnv {
-  const env = (
-    typeof process !== "undefined" ? process.env["KHUFUS_ENV"] : undefined
-  ) as string | undefined;
+  const env = (typeof process !== "undefined" ? process.env.KHUFUS_ENV : undefined) as
+    | string
+    | undefined;
 
   if (env === "prod") return "prod";
   return "local";

@@ -3,11 +3,7 @@ import type { DeviceState } from "@khufushome/types";
 export interface HAClient {
   getStates: () => Promise<DeviceState[]>;
   getState: (entityId: string) => Promise<DeviceState>;
-  callService: (
-    domain: string,
-    service: string,
-    data?: Record<string, unknown>,
-  ) => Promise<void>;
+  callService: (domain: string, service: string, data?: Record<string, unknown>) => Promise<void>;
 }
 
 /**
