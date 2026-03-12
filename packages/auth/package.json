@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./hooks": {
+      "types": "./src/hooks/index.ts",
+      "default": "./src/hooks/index.ts"
     }
   },
   "scripts": {
@@ -21,7 +25,11 @@
     "@khufushome/types": "workspace:*",
     "@supabase/supabase-js": "^2.99.1"
   },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
   "devDependencies": {
+    "@types/react": "^19.2.14",
     "typescript": "^5.9.3"
   }
 }
