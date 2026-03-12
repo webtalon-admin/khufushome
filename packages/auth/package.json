@@ -18,7 +18,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@khufushome/types": "workspace:*"
+    "@khufushome/types": "workspace:*",
+    "@supabase/supabase-js": "^2.99.1"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
