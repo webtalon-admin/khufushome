@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+out/
+.cursor/
+
+# Turbo
+.turbo/
+
+# Environment secrets (NEVER commit these)
+.env.local
+.env.prod
+.env.*.local
+*.secret
+
+# Config (env.yaml is committed, secrets are not)
+# config/env.yaml is intentionally tracked
+
+# Supabase local
+.supabase/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# TypeScript build info (cached by turbo)
+*.tsbuildinfo
+
+# Test coverage
+coverage/

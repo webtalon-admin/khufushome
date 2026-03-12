@@ -1,0 +1,30 @@
+{
+  "name": "@khufushome/home-assistant",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./mock": {
+      "types": "./src/mock/index.ts",
+      "default": "./src/mock/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck": "tsc -b",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@khufushome/types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
