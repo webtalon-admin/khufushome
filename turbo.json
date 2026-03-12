@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local", ".npmrc"],
+  "globalDependencies": ["**/.env.*local", ".npmrc", "config/env.yaml"],
   "globalEnv": ["KHUFUS_ENV"],
   "tasks": {
     "build": {

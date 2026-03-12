@@ -8,6 +8,14 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./vite": {
+      "types": "./src/vite-plugin.ts",
+      "default": "./src/vite-plugin.ts"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "default": "./src/client.ts"
+    },
     "./tsconfig/base": "./tsconfig/base.json",
     "./tsconfig/react": "./tsconfig/react.json",
     "./tailwind/theme.css": "./tailwind/theme.css"
@@ -26,6 +34,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.4.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
   }
 }

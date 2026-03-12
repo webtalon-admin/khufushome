@@ -32,11 +32,6 @@ const envBlockSchema = z.object({
 
 export type AppEnvironment = z.infer<typeof envBlockSchema>;
 
-const envFileSchema = z.object({
-  local: envBlockSchema,
-  prod: envBlockSchema,
-});
-
 let cachedConfig: AppEnvironment | null = null;
 let cachedEnv: KhufusEnv | null = null;
 
@@ -64,9 +59,16 @@ export function loadConfig(env?: KhufusEnv): AppEnvironment {
   const yamlPath = findConfigFile();
   const raw = readFileSync(yamlPath, "utf-8");
   const parsed = parseYaml(raw);
-  const validated = envFileSchema.parse(parsed);
 
-  cachedConfig = validated[resolvedEnv];
+  const envBlock = (parsed as Record<string, unknown>)[resolvedEnv];
+  if (!envBlock) {
+    throw new Error(
+      `No "${resolvedEnv}" block found in ${yamlPath}. ` +
+        `Available blocks: ${Object.keys(parsed as Record<string, unknown>).join(", ")}`,
+    );
+  }
+
+  cachedConfig = envBlockSchema.parse(envBlock);
   cachedEnv = resolvedEnv;
   return cachedConfig;
 }
