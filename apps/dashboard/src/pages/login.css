@@ -1,0 +1,86 @@
+.login-bg {
+	background: linear-gradient(135deg, #1a0533 0%, #2d1b4e 30%, #4a2065 60%, #6b2fa0 100%);
+}
+
+.stars {
+	position: absolute;
+	inset: 0;
+	background-image:
+		radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 25% 45%, rgba(255, 255, 255, 0.4), transparent),
+		radial-gradient(1.5px 1.5px at 50% 15%, rgba(255, 255, 255, 0.7), transparent),
+		radial-gradient(1px 1px at 70% 35%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1px 1px at 85% 10%, rgba(255, 255, 255, 0.4), transparent),
+		radial-gradient(1.5px 1.5px at 15% 70%, rgba(255, 255, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.3), transparent),
+		radial-gradient(1px 1px at 60% 60%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1px 1px at 90% 75%, rgba(255, 255, 255, 0.4), transparent),
+		radial-gradient(1.5px 1.5px at 5% 50%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1px 1px at 35% 5%, rgba(255, 255, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 75% 90%, rgba(255, 255, 255, 0.3), transparent);
+	animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+.stars-2 {
+	background-image:
+		radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1px 1px at 45% 55%, rgba(255, 255, 255, 0.3), transparent),
+		radial-gradient(1px 1px at 65% 25%, rgba(255, 255, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 80% 50%, rgba(255, 255, 255, 0.4), transparent),
+		radial-gradient(1.5px 1.5px at 55% 85%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1px 1px at 30% 95%, rgba(255, 255, 255, 0.3), transparent),
+		radial-gradient(1px 1px at 92% 40%, rgba(255, 255, 255, 0.5), transparent);
+	animation-delay: 2s;
+	animation-direction: alternate-reverse;
+}
+
+@keyframes twinkle {
+	0% { opacity: 0.6; }
+	100% { opacity: 1; }
+}
+
+.shooting-star {
+	position: absolute;
+	width: 80px;
+	height: 1px;
+	background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), transparent);
+	top: 15%;
+	right: 10%;
+	transform: rotate(-35deg);
+	animation: shoot 3s ease-out infinite;
+	animation-delay: 1s;
+}
+
+.shooting-star-2 {
+	top: 25%;
+	right: 30%;
+	width: 60px;
+	animation-delay: 4s;
+	animation-duration: 2.5s;
+}
+
+.shooting-star-3 {
+	top: 10%;
+	right: 55%;
+	width: 50px;
+	animation-delay: 7s;
+	animation-duration: 2s;
+}
+
+@keyframes shoot {
+	0% {
+		opacity: 0;
+		transform: rotate(-35deg) translateX(0);
+	}
+	5% {
+		opacity: 1;
+	}
+	15% {
+		opacity: 0;
+		transform: rotate(-35deg) translateX(-200px);
+	}
+	100% {
+		opacity: 0;
+		transform: rotate(-35deg) translateX(-200px);
+	}
+}
