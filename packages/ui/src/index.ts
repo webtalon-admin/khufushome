@@ -69,6 +69,12 @@ export type { DataTableProps } from "./components/ui/data-table";
 export { StatusBadge, statusBadgeVariants } from "./components/ui/status-badge";
 export type { StatusBadgeProps } from "./components/ui/status-badge";
 
+// ── Theme ──
+export { ThemeProvider, useTheme } from "./hooks/use-theme";
+export type { Theme, ThemeProviderProps } from "./hooks/use-theme";
+export { ThemeToggle } from "./components/ui/theme-toggle";
+export type { ThemeToggleProps } from "./components/ui/theme-toggle";
+
 // ── Layouts ──
 export { AppShell, useAppShell } from "./components/layouts/AppShell";
 export type { AppShellProps } from "./components/layouts/AppShell";

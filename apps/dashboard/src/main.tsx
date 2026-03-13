@@ -1,5 +1,6 @@
 import { initAuth } from "@khufushome/auth";
 import { getClientConfig } from "@khufushome/config/client";
+import { ThemeProvider } from "@khufushome/ui";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
@@ -14,7 +15,9 @@ initAuth({
 }).then(() => {
 	createRoot(document.getElementById("root")!).render(
 		<StrictMode>
-			<App />
+			<ThemeProvider>
+				<App />
+			</ThemeProvider>
 		</StrictMode>,
 	);
 });
