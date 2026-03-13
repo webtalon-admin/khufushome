@@ -14,13 +14,6 @@ export function LoginPage() {
 
 	return (
 		<AuthLayout>
-			{/* Animated stars */}
-			<div className="stars" />
-			<div className="stars stars-2" />
-			<div className="shooting-star" />
-			<div className="shooting-star shooting-star-2" />
-			<div className="shooting-star shooting-star-3" />
-
 			{/* Login card */}
 		<div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl shadow-2xl">
 			{/* Gradient header with mountain silhouette */}

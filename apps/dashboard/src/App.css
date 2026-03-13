@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@khufushome/ui/styles";
 @import "@khufushome/config/tailwind/theme.css";
-@import "./pages/login.css";
 
 @source "../../../packages/ui";
