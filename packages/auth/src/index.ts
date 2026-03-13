@@ -14,3 +14,5 @@ export {
 } from "./hooks/use-auth";
 export { useRole } from "./hooks/use-role";
 export type { UserRole } from "./hooks/use-role";
+
+export { ProtectedRoute } from "./components/ProtectedRoute";
