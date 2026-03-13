@@ -18,6 +18,7 @@
     "@khufushome/auth": "workspace:*",
     "@khufushome/config": "workspace:*",
     "@khufushome/ui": "workspace:*",
+    "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

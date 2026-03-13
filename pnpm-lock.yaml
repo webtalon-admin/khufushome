@@ -72,6 +72,9 @@ importers:
       '@khufushome/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      lucide-react:
+        specifier: ^0.577.0
+        version: 0.577.0(react@19.2.4)
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -112,6 +115,9 @@ importers:
       '@khufushome/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      lucide-react:
+        specifier: ^0.577.0
+        version: 0.577.0(react@19.2.4)
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -222,10 +228,10 @@ importers:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.4)
       react:
-        specifier: ^19.2.4
+        specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4
       react-dom:
-        specifier: ^19.2.4
+        specifier: ^18.0.0 || ^19.0.0
         version: 19.2.4(react@19.2.4)
       sonner:
         specifier: ^2.0.7
