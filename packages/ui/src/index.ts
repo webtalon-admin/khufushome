@@ -69,6 +69,22 @@ export type { DataTableProps } from "./components/ui/data-table";
 export { StatusBadge, statusBadgeVariants } from "./components/ui/status-badge";
 export type { StatusBadgeProps } from "./components/ui/status-badge";
 
+// ── Skeleton ──
+export {
+	Skeleton,
+	SkeletonText,
+	SkeletonCard,
+	SkeletonTableRows,
+	SkeletonPage,
+} from "./components/ui/skeleton";
+
+// ── Error Boundary ──
+export { ErrorBoundary, DefaultErrorFallback } from "./components/ui/error-boundary";
+export type {
+	ErrorBoundaryProps,
+	ErrorFallbackProps,
+} from "./components/ui/error-boundary";
+
 // ── Theme ──
 export { ThemeProvider, useTheme } from "./hooks/use-theme";
 export type { Theme, ThemeProviderProps } from "./hooks/use-theme";
