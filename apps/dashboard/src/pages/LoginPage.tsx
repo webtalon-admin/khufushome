@@ -23,7 +23,7 @@ export function LoginPage() {
 			{/* Login card */}
 			<div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl shadow-2xl">
 				{/* Gradient header with mountain silhouette */}
-				<div className="relative h-52 overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700">
+				<div className="relative h-52 overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600">
 					<div className="absolute inset-0 opacity-30">
 					<svg
 						aria-hidden="true"
@@ -42,13 +42,13 @@ export function LoginPage() {
 						</svg>
 					</div>
 					{/* Moon */}
-					<div className="absolute top-8 right-12 h-10 w-10 rounded-full bg-gradient-to-br from-amber-200 to-orange-300 opacity-80 shadow-lg shadow-amber-200/30" />
+					<div className="absolute top-8 right-12 h-10 w-10 rounded-full bg-gradient-to-br from-accent-warm-200 to-accent-warm-400 opacity-80 shadow-lg shadow-accent-warm-300/30" />
 					<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
 				</div>
 
 				{/* Form */}
 				<div className="bg-white px-8 pt-2 pb-8">
-					<h1 className="mb-6 text-center text-3xl font-semibold tracking-tight text-gray-800">
+					<h1 className="mb-6 text-center font-display text-3xl font-semibold tracking-tight text-text-primary">
 						Sign In
 					</h1>
 
@@ -60,7 +60,7 @@ export function LoginPage() {
 
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="relative">
-							<span className="absolute top-1/2 left-3 -translate-y-1/2 text-purple-400">
+							<span className="absolute top-1/2 left-3 -translate-y-1/2 text-brand-400">
 							<svg
 								aria-hidden="true"
 								className="h-5 w-5"
@@ -83,12 +83,12 @@ export function LoginPage() {
 								onChange={(e) => setEmail(e.target.value)}
 								required
 								autoComplete="email"
-								className="w-full rounded-xl border border-purple-100 bg-purple-50/50 py-3 pr-4 pl-10 text-gray-700 placeholder-purple-300 transition focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-200"
+								className="w-full rounded-xl border border-brand-100 bg-brand-50/50 py-3 pr-4 pl-10 text-text-primary placeholder-brand-300 transition focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
 							/>
 						</div>
 
 						<div className="relative">
-							<span className="absolute top-1/2 left-3 -translate-y-1/2 text-purple-400">
+							<span className="absolute top-1/2 left-3 -translate-y-1/2 text-brand-400">
 							<svg
 								aria-hidden="true"
 								className="h-5 w-5"
@@ -111,14 +111,14 @@ export function LoginPage() {
 								onChange={(e) => setPassword(e.target.value)}
 								required
 								autoComplete="current-password"
-								className="w-full rounded-xl border border-purple-100 bg-purple-50/50 py-3 pr-4 pl-10 text-gray-700 placeholder-purple-300 transition focus:border-purple-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-200"
+								className="w-full rounded-xl border border-brand-100 bg-brand-50/50 py-3 pr-4 pl-10 text-text-primary placeholder-brand-300 transition focus:border-brand-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
 							/>
 						</div>
 
 						<button
 							type="submit"
 							disabled={loading}
-							className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-purple-700 to-indigo-800 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-purple-700/30 transition hover:from-purple-800 hover:to-indigo-900 hover:shadow-purple-800/40 disabled:cursor-not-allowed disabled:opacity-60"
+							className="w-full cursor-pointer rounded-xl bg-gradient-to-r from-brand-700 to-brand-900 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-brand-700/30 transition hover:from-brand-800 hover:to-brand-950 hover:shadow-brand-800/40 disabled:cursor-not-allowed disabled:opacity-60"
 						>
 							{loading ? (
 								<span className="inline-flex items-center gap-2">
@@ -152,7 +152,7 @@ export function LoginPage() {
 						</button>
 					</form>
 
-					<p className="mt-6 text-center text-xs text-gray-400">
+					<p className="mt-6 text-center text-xs text-muted-foreground">
 						KhufusHome
 					</p>
 				</div>

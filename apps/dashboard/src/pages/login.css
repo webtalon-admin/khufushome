@@ -1,5 +1,11 @@
 .login-bg {
-	background: linear-gradient(135deg, #1a0533 0%, #2d1b4e 30%, #4a2065 60%, #6b2fa0 100%);
+	background: linear-gradient(
+		135deg,
+		var(--color-deep-950) 0%,
+		var(--color-deep-900) 30%,
+		var(--color-deep-800) 60%,
+		var(--color-deep-700) 100%
+	);
 }
 
 .stars {
