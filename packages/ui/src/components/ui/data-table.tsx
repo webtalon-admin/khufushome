@@ -67,8 +67,8 @@ function DataTable<TData, TValue>({
 				/>
 			)}
 
-			<div className="rounded-md border border-border">
-				<Table>
+		<div className="-mx-4 overflow-x-auto sm:mx-0 sm:rounded-md sm:border sm:border-border">
+			<Table className="min-w-[600px] sm:min-w-0">
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
@@ -116,32 +116,32 @@ function DataTable<TData, TValue>({
 				</Table>
 			</div>
 
-			{table.getPageCount() > 1 && (
-				<div className="flex items-center justify-between">
-					<p className="text-sm text-muted-foreground">
-						Page {table.getState().pagination.pageIndex + 1} of{" "}
-						{table.getPageCount()}
-					</p>
-					<div className="flex gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => table.previousPage()}
-							disabled={!table.getCanPreviousPage()}
-						>
-							Previous
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => table.nextPage()}
-							disabled={!table.getCanNextPage()}
-						>
-							Next
-						</Button>
-					</div>
+		{table.getPageCount() > 1 && (
+			<div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+				<p className="text-xs text-muted-foreground sm:text-sm">
+					Page {table.getState().pagination.pageIndex + 1} of{" "}
+					{table.getPageCount()}
+				</p>
+				<div className="flex gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => table.previousPage()}
+						disabled={!table.getCanPreviousPage()}
+					>
+						Previous
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => table.nextPage()}
+						disabled={!table.getCanNextPage()}
+					>
+						Next
+					</Button>
 				</div>
-			)}
+			</div>
+		)}
 		</div>
 	);
 }

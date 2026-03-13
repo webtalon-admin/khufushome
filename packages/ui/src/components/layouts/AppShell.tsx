@@ -65,7 +65,7 @@ export function AppShell({
 
 	return (
 		<AppShellContext.Provider value={{ sidebarOpen, setSidebarOpen, toggle }}>
-			<div className={cn("relative min-h-screen bg-background", className)}>
+			<div className={cn("relative min-h-svh bg-background", className)}>
 				{/* Mobile backdrop */}
 				{sidebarOpen && (
 					<button
@@ -101,7 +101,7 @@ export function AppShell({
 				</aside>
 
 				{/* Main area — offset by sidebar width on desktop */}
-				<div className="flex min-h-screen flex-col md:pl-64">
+				<div className="flex min-h-svh flex-col md:pl-64">
 					{/* Header */}
 					<header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-sm sm:px-6">
 						<button
