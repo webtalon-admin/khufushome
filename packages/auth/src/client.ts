@@ -1,27 +1,39 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type { SupabaseClient };
+
+export interface CreateSupabaseClientOptions {
+	supabaseUrl: string;
+	anonKey: string;
+	cookieDomain: string;
+}
 
 let _client: SupabaseClient | null = null;
 
 /**
- * Creates (or returns the cached) Supabase client.
+ * Creates (or returns the cached) Supabase client with cookie-based
+ * session storage for cross-subdomain sharing.
  *
- * Call once at app startup with the URL + anon key, then import
- * `getSupabaseClient()` anywhere else to reuse the same instance.
+ * Call once at app startup, then use `getSupabaseClient()` everywhere else.
  */
 export function createSupabaseClient(
-	supabaseUrl: string,
-	anonKey: string,
+	opts: CreateSupabaseClientOptions,
 ): SupabaseClient {
 	if (_client) return _client;
 
-	_client = createClient(supabaseUrl, anonKey, {
-		auth: {
-			persistSession: true,
-			autoRefreshToken: true,
-			detectSessionInUrl: true,
+	const isLocalhost =
+		opts.cookieDomain === "localhost" ||
+		opts.cookieDomain === "127.0.0.1";
+
+	_client = createBrowserClient(opts.supabaseUrl, opts.anonKey, {
+		cookieOptions: {
+			domain: opts.cookieDomain,
+			path: "/",
+			sameSite: "lax",
+			secure: !isLocalhost,
 		},
+		isSingleton: true,
 	});
 
 	return _client;
@@ -40,7 +52,7 @@ export function getSupabaseClient(): SupabaseClient {
 	return _client;
 }
 
-/** Reset the cached client — useful for testing. */
+/** Reset the cached client -- useful for testing. */
 export function resetSupabaseClient(): void {
 	_client = null;
 }

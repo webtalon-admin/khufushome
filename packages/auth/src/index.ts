@@ -3,7 +3,8 @@ export {
 	getSupabaseClient,
 	resetSupabaseClient,
 } from "./client";
-export type { SupabaseClient } from "./client";
+export type { SupabaseClient, CreateSupabaseClientOptions } from "./client";
+export { initAuth } from "./init";
 
 export {
 	useAuth,
