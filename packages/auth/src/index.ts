@@ -9,7 +9,7 @@ export {
 	useAuth,
 	useRequireAuth,
 	useSignIn,
-	useSignUp,
 	useSignOut,
 } from "./hooks/use-auth";
-export { useMagicLink } from "./hooks/use-magic-link";
+export { useRole } from "./hooks/use-role";
+export type { UserRole } from "./hooks/use-role";

@@ -2,7 +2,7 @@ export {
 	useAuth,
 	useRequireAuth,
 	useSignIn,
-	useSignUp,
 	useSignOut,
 } from "./use-auth";
-export { useMagicLink } from "./use-magic-link";
+export { useRole } from "./use-role";
+export type { UserRole } from "./use-role";

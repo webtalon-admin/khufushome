@@ -113,38 +113,6 @@ export function useSignIn() {
 }
 
 /**
- * Returns a sign-up function for email/password registration.
- */
-export function useSignUp() {
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-
-	const signUp = useCallback(
-		async (email: string, password: string) => {
-			setLoading(true);
-			setError(null);
-
-			const supabase = getSupabaseClient();
-			const { error: authError } = await supabase.auth.signUp({
-				email,
-				password,
-			});
-
-			setLoading(false);
-
-			if (authError) {
-				setError(authError.message);
-				return { error: authError.message };
-			}
-			return { error: null };
-		},
-		[],
-	);
-
-	return { signUp, loading, error };
-}
-
-/**
  * Returns a sign-out function.
  */
 export function useSignOut() {
