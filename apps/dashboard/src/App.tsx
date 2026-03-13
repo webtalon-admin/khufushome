@@ -4,6 +4,7 @@ import {
 	AppShell,
 	Button,
 	SubdomainNav,
+	ThemeToggle,
 	type AppUrls,
 } from "@khufushome/ui";
 import { LogOut, User } from "lucide-react";
@@ -24,6 +25,7 @@ function UserMenu() {
 
 	return (
 		<div className="flex items-center gap-3">
+			<ThemeToggle />
 			<div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
 				<User className="size-4" />
 				<span>{user?.email}</span>

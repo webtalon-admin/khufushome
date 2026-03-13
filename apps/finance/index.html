@@ -12,6 +12,9 @@
     />
   </head>
   <body>
+    <script>
+      (()=>{var t=localStorage.getItem("khufushome-theme");var d=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme:dark)").matches);document.documentElement.classList.toggle("dark",d)})();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
