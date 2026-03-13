@@ -14,7 +14,7 @@ export function LoginPage() {
 
 	return (
 		<AuthLayout>
-			<div className="relative z-10 w-full max-w-sm rounded-2xl bg-card p-8 shadow-2xl">
+			<div className="relative z-10 w-full max-w-sm rounded-2xl bg-card p-5 shadow-2xl sm:p-8">
 				<div className="mb-6 text-center">
 					<div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-800 shadow-lg">
 						<svg

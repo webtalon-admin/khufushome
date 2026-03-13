@@ -74,7 +74,7 @@ function ThreeDContent() {
 				Interactive 3D model of your home with live device states.
 			</p>
 
-			<div className="mt-8 flex items-center justify-center rounded-xl border border-border bg-card p-16 shadow-sm">
+			<div className="mt-8 flex items-center justify-center rounded-xl border border-border bg-card p-8 shadow-sm sm:p-16">
 				<div className="text-center">
 					<div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted">
 						<svg

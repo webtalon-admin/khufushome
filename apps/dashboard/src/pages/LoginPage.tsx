@@ -22,9 +22,9 @@ export function LoginPage() {
 			<div className="shooting-star shooting-star-3" />
 
 			{/* Login card */}
-			<div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl shadow-2xl">
-				{/* Gradient header with mountain silhouette */}
-				<div className="relative h-52 overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600">
+		<div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl shadow-2xl">
+			{/* Gradient header with mountain silhouette */}
+			<div className="relative h-36 overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600 sm:h-52">
 					<div className="absolute inset-0 opacity-30">
 					<svg
 						aria-hidden="true"
@@ -44,11 +44,11 @@ export function LoginPage() {
 					</div>
 					{/* Moon */}
 					<div className="absolute top-8 right-12 h-10 w-10 rounded-full bg-gradient-to-br from-accent-warm-200 to-accent-warm-400 opacity-80 shadow-lg shadow-accent-warm-300/30" />
-					<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
+					<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card to-transparent" />
 				</div>
 
-				{/* Form */}
-				<div className="bg-white px-8 pt-2 pb-8">
+			{/* Form */}
+			<div className="bg-card px-5 pt-2 pb-6 sm:px-8 sm:pb-8">
 					<h1 className="mb-6 text-center font-display text-3xl font-semibold tracking-tight text-text-primary">
 						Sign In
 					</h1>

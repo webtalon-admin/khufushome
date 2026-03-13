@@ -75,6 +75,9 @@ export type { Theme, ThemeProviderProps } from "./hooks/use-theme";
 export { ThemeToggle } from "./components/ui/theme-toggle";
 export type { ThemeToggleProps } from "./components/ui/theme-toggle";
 
+// ── Responsive ──
+export { useMediaQuery, useIsMobile, breakpoints } from "./hooks/use-media-query";
+
 // ── Layouts ──
 export { AppShell, useAppShell } from "./components/layouts/AppShell";
 export type { AppShellProps } from "./components/layouts/AppShell";

@@ -17,7 +17,7 @@ export function AuthLayout({ children, className }: AuthLayoutProps) {
 	return (
 		<div
 			className={cn(
-				"relative flex min-h-screen items-center justify-center overflow-hidden",
+				"relative flex min-h-svh items-center justify-center overflow-hidden px-4 py-8",
 				"bg-gradient-to-br from-deep-950 via-deep-900 to-deep-700",
 				className,
 			)}
