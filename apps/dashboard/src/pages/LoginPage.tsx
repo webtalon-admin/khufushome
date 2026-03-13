@@ -1,4 +1,5 @@
 import { useSignIn } from "@khufushome/auth";
+import { AuthLayout } from "@khufushome/ui";
 import { type FormEvent, useState } from "react";
 
 export function LoginPage() {
@@ -12,7 +13,7 @@ export function LoginPage() {
 	};
 
 	return (
-		<div className="login-bg relative flex min-h-screen items-center justify-center overflow-hidden">
+		<AuthLayout>
 			{/* Animated stars */}
 			<div className="stars" />
 			<div className="stars stars-2" />
@@ -157,6 +158,6 @@ export function LoginPage() {
 					</p>
 				</div>
 			</div>
-		</div>
+		</AuthLayout>
 	);
 }
