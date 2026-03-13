@@ -1,21 +1,9 @@
-import { useAuth, useSignOut } from "@khufushome/auth";
+import { ProtectedRoute, useAuth, useSignOut } from "@khufushome/auth";
 import { LoginPage } from "./pages/LoginPage";
 
-export function App() {
-	const { user, loading } = useAuth();
+function Dashboard() {
+	const { user } = useAuth();
 	const { signOut } = useSignOut();
-
-	if (loading) {
-		return (
-			<div className="flex min-h-screen items-center justify-center bg-surface">
-				<div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" />
-			</div>
-		);
-	}
-
-	if (!user) {
-		return <LoginPage />;
-	}
 
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center bg-surface font-sans">
@@ -23,7 +11,7 @@ export function App() {
 				KhufusHome Dashboard
 			</h1>
 			<p className="mt-2 text-lg text-text-secondary">
-				Welcome, {user.email}
+				Welcome, {user?.email}
 			</p>
 			<div className="mt-6 flex gap-3">
 				<span className="rounded-md bg-brand-500 px-4 py-2 text-sm font-medium text-white">
@@ -41,5 +29,13 @@ export function App() {
 				</button>
 			</div>
 		</div>
+	);
+}
+
+export function App() {
+	return (
+		<ProtectedRoute fallbackUnauthenticated={<LoginPage />}>
+			<Dashboard />
+		</ProtectedRoute>
 	);
 }
