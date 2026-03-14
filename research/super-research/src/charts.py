@@ -24,7 +24,14 @@ COLOUR_PALETTE = [
 ]
 
 
+_VIRTUAL_FUND_LABELS = {
+    "smsf_btc": "SMSF 100% Bitcoin",
+}
+
+
 def _fund_label(fund_id: str, funds: dict[str, FundConfig]) -> str:
+    if fund_id in _VIRTUAL_FUND_LABELS:
+        return _VIRTUAL_FUND_LABELS[fund_id]
     if fund_id in funds:
         f = funds[fund_id]
         return f"{f.name} ({f.option})"
@@ -335,24 +342,28 @@ def personal_what_if_chart(
         hovertemplate="%{x|%b %Y}: $%{y:,.0f}<extra>Your actual balance</extra>",
     ))
 
+    _VIRTUAL_COLOURS = {"smsf_btc": "#F7931A"}
+
     alt_cols = [c for c in df.columns if c not in ("date", "actual")]
-    for i, fund_id in enumerate(alt_cols):
+    palette_idx = 0
+    for fund_id in alt_cols:
+        colour = _VIRTUAL_COLOURS.get(fund_id)
+        if not colour:
+            colour = COLOUR_PALETTE[palette_idx % len(COLOUR_PALETTE)]
+            palette_idx += 1
         fig.add_trace(go.Scatter(
             x=df["date"],
             y=df[fund_id],
             mode="lines+markers",
             name=_fund_label(fund_id, funds),
-            line=dict(
-                color=COLOUR_PALETTE[i % len(COLOUR_PALETTE)],
-                width=2,
-                dash="dot",
-            ),
+            line=dict(color=colour, width=2, dash="dot"),
             marker=dict(size=5, symbol="diamond"),
             hovertemplate="%{x|%b %Y}: $%{y:,.0f}<extra>%{fullData.name}</extra>",
         ))
 
     final_actual = df["actual"].iloc[-1]
-    best_alt_col = max(alt_cols, key=lambda c: df[c].iloc[-1])
+    alt_cols_with_values = [c for c in alt_cols if pd.notna(df[c].iloc[-1])]
+    best_alt_col = max(alt_cols_with_values, key=lambda c: df[c].iloc[-1]) if alt_cols_with_values else alt_cols[0]
     best_alt_val = df[best_alt_col].iloc[-1]
     diff = best_alt_val - final_actual
 

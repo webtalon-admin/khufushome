@@ -111,6 +111,13 @@ def load_au_benchmarks(path: Optional[Path] = None) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def load_btc_aud_monthly(path: Optional[Path] = None) -> pd.DataFrame:
+    """Load monthly BTC/AUD close prices (month-end close, labelled as 1st of month)."""
+    path = path or DATA_DIR / "benchmarks" / "btc_aud_monthly.csv"
+    df = pd.read_csv(path, parse_dates=["date"])
+    return df
+
+
 def get_benchmark_for_age(age: int, benchmarks: pd.DataFrame | None = None) -> dict:
     """Return the median/average benchmark row for a given age."""
     if benchmarks is None:
@@ -125,6 +132,10 @@ def get_benchmark_for_age(age: int, benchmarks: pd.DataFrame | None = None) -> d
         "female_median": r["female_median"],
         "male_average": r.get("male_average"),
         "female_average": r.get("female_average"),
+        "male_p75": r.get("male_p75"),
+        "female_p75": r.get("female_p75"),
+        "male_p90": r.get("male_p90"),
+        "female_p90": r.get("female_p90"),
         "source": r["source"],
     }
 
