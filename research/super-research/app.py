@@ -10,6 +10,7 @@ from src.data_loader import (
     load_fee_structures,
     load_fee_models,
     load_au_benchmarks,
+    load_btc_aud_monthly,
     get_benchmark_for_age,
     get_fund_label,
 )
@@ -19,6 +20,7 @@ from src.analysis import (
     historical_what_if,
     fee_drag_over_time,
     scenario_projections,
+    smsf_btc_what_if,
 )
 from src.charts import (
     annualised_returns_bar,
@@ -104,15 +106,23 @@ if page == "Overview":
         st.markdown("### How You Compare to Other Australians")
         male_med = my_benchmark.get("male_median", 0)
         male_avg = my_benchmark.get("male_average")
+        male_p75 = my_benchmark.get("male_p75")
+        male_p90 = my_benchmark.get("male_p90")
         age_group = my_benchmark.get("age_group", "")
 
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            st.metric(
-                label="Your Balance",
-                value=f"${personal.current_balance:,.0f}",
-            )
-        with col_b:
+        has_avg = male_avg and not pd.isna(male_avg)
+        has_p75 = male_p75 and not pd.isna(male_p75)
+        has_p90 = male_p90 and not pd.isna(male_p90)
+
+        n_cols = 2 + int(has_avg) + int(has_p75) + int(has_p90)
+        cols = st.columns(n_cols)
+        col_idx = 0
+
+        with cols[col_idx]:
+            st.metric(label="Your Balance", value=f"${personal.current_balance:,.0f}")
+        col_idx += 1
+
+        with cols[col_idx]:
             diff_med = personal.current_balance - male_med
             st.metric(
                 label=f"Median (Male {age_group})",
@@ -120,8 +130,10 @@ if page == "Overview":
                 delta=f"You're ${abs(diff_med):,.0f} {'above' if diff_med >= 0 else 'below'}",
                 delta_color="normal" if diff_med >= 0 else "inverse",
             )
-        with col_c:
-            if male_avg and not pd.isna(male_avg):
+        col_idx += 1
+
+        if has_avg:
+            with cols[col_idx]:
                 diff_avg = personal.current_balance - male_avg
                 st.metric(
                     label=f"Average (Male {age_group})",
@@ -129,8 +141,33 @@ if page == "Overview":
                     delta=f"You're ${abs(diff_avg):,.0f} {'above' if diff_avg >= 0 else 'below'}",
                     delta_color="normal" if diff_avg >= 0 else "inverse",
                 )
+            col_idx += 1
+
+        if has_p75:
+            with cols[col_idx]:
+                diff_p75 = personal.current_balance - male_p75
+                st.metric(
+                    label=f"75th Percentile (Male {age_group})",
+                    value=f"${male_p75:,.0f}",
+                    delta=f"You're ${abs(diff_p75):,.0f} {'above' if diff_p75 >= 0 else 'below'}",
+                    delta_color="normal" if diff_p75 >= 0 else "inverse",
+                )
+            col_idx += 1
+
+        if has_p90:
+            with cols[col_idx]:
+                diff_p90 = personal.current_balance - male_p90
+                st.metric(
+                    label=f"90th Percentile (Male {age_group})",
+                    value=f"${male_p90:,.0f}",
+                    delta=f"You're ${abs(diff_p90):,.0f} {'above' if diff_p90 >= 0 else 'below'}",
+                    delta_color="normal" if diff_p90 >= 0 else "inverse",
+                )
 
         bench_df = au_benchmarks[["age_group", "male_median", "female_median"]].copy()
+        for col in ["male_p75", "female_p75", "male_p90", "female_p90"]:
+            if col in au_benchmarks.columns:
+                bench_df[col] = au_benchmarks[col]
         bench_df["your_balance"] = None
         user_row = bench_df[
             (au_benchmarks["age_min"] <= personal.age) & (au_benchmarks["age_max"] >= personal.age)
@@ -148,29 +185,64 @@ if page == "Overview":
             x=bench_df["age_group"], y=bench_df["female_median"],
             name="Female Median", marker_color="#A23B72",
         ))
+        if "male_p75" in bench_df.columns:
+            fig_bench.add_trace(go.Bar(
+                x=bench_df["age_group"], y=bench_df["male_p75"],
+                name="Male 75th Percentile", marker_color="#F18F01",
+            ))
+        if "female_p75" in bench_df.columns:
+            fig_bench.add_trace(go.Bar(
+                x=bench_df["age_group"], y=bench_df["female_p75"],
+                name="Female 75th Percentile", marker_color="#C73E1D",
+            ))
+        if "male_p90" in bench_df.columns:
+            fig_bench.add_trace(go.Bar(
+                x=bench_df["age_group"], y=bench_df["male_p90"],
+                name="Male 90th Percentile", marker_color="#2D936C",
+            ))
+        if "female_p90" in bench_df.columns:
+            fig_bench.add_trace(go.Bar(
+                x=bench_df["age_group"], y=bench_df["female_p90"],
+                name="Female 90th Percentile", marker_color="#5B5EA6",
+            ))
         if bench_df["your_balance"].notna().any():
             fig_bench.add_trace(go.Bar(
                 x=bench_df["age_group"], y=bench_df["your_balance"],
                 name="YOU", marker_color="#E94F37",
             ))
         fig_bench.update_layout(
-            title="Median Super Balance by Age Group (ATO 2021-22) — Where You Sit",
+            title="Super Balance by Age Group (ATO 2021-22) — Where You Sit",
             xaxis_title="Age Group",
             yaxis_title="Balance ($)",
             template="plotly_white",
             barmode="group",
-            height=400,
+            height=500,
             yaxis_tickprefix="$",
             yaxis_tickformat=",",
         )
         st.plotly_chart(fig_bench, use_container_width=True)
-        st.caption(
-            f"Source: ATO Taxation Statistics 2021-22, ASFA Oct 2025. "
+
+        pct_vs_median = ((personal.current_balance / male_med) - 1) * 100
+        caption = (
+            f"Source: ATO Taxation Statistics 2021-22, ASFA Nov 2023. "
             f"Your balance of ${personal.current_balance:,.0f} is "
-            f"**{((personal.current_balance / male_med) - 1) * 100:.0f}% above** the male median "
-            f"for your age group ({age_group}). "
-            f"Note: these benchmarks include ALL fund types and contribution levels."
+            f"**{abs(pct_vs_median):.0f}% {'above' if pct_vs_median >= 0 else 'below'}** the male median "
+            f"for your age group ({age_group})."
         )
+        if has_p75:
+            pct_vs_p75 = ((personal.current_balance / male_p75) - 1) * 100
+            if pct_vs_p75 >= 0:
+                caption += f" **{pct_vs_p75:.0f}% above** the 75th percentile."
+            else:
+                caption += f" **{abs(pct_vs_p75):.0f}% below** the 75th percentile."
+        if has_p90:
+            pct_vs_p90 = ((personal.current_balance / male_p90) - 1) * 100
+            if pct_vs_p90 >= 0:
+                caption += f" **{pct_vs_p90:.0f}% above** the 90th percentile."
+            else:
+                caption += f" **{abs(pct_vs_p90):.0f}% below** the 90th percentile."
+        caption += " Percentiles estimated via log-normal interpolation of ATO distribution data."
+        st.caption(caption)
 
         st.markdown("---")
 
@@ -232,10 +304,20 @@ elif page == "Historical Performance":
             fees=fee_models,
         )
         if not whatif_df.empty:
+            btc_prices = load_btc_aud_monthly()
+            btc_result = smsf_btc_what_if(personal, btc_prices)
+            if btc_result:
+                btc_snap_map = {str(d): v for d, v in btc_result["snapshot_values"]}
+                whatif_df["smsf_btc"] = whatif_df["date"].apply(
+                    lambda d: btc_snap_map.get(str(d))
+                )
+
             fig_personal = personal_what_if_chart(
                 whatif_df, funds, current_fund_id=personal.current_fund,
             )
             st.plotly_chart(fig_personal, use_container_width=True)
+
+            all_alt_ids = whatif_funds + (["smsf_btc"] if "smsf_btc" in whatif_df.columns else [])
 
             st.markdown("#### Balance Comparison at Each Snapshot")
             display_df = whatif_df.copy()
@@ -243,19 +325,24 @@ elif page == "Historical Performance":
             rename_map = {"date": "Date", "actual": f"Future Super (Actual)"}
             for fid in whatif_funds:
                 rename_map[fid] = get_fund_label(fid, funds)
+            if "smsf_btc" in display_df.columns:
+                rename_map["smsf_btc"] = "SMSF 100% Bitcoin"
             display_df = display_df.rename(columns=rename_map)
             for col in display_df.columns[1:]:
-                display_df[col] = display_df[col].apply(lambda x: f"${x:,.0f}")
+                display_df[col] = display_df[col].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "N/A")
             st.dataframe(display_df, use_container_width=True, hide_index=True)
 
             final_row = whatif_df.iloc[-1]
             st.markdown("#### Opportunity Cost Summary")
             opp_rows = []
-            for fid in whatif_funds:
-                alt_bal = final_row[fid]
+            for fid in all_alt_ids:
+                alt_bal = final_row.get(fid)
+                if alt_bal is None or (isinstance(alt_bal, float) and pd.isna(alt_bal)):
+                    continue
                 diff = alt_bal - final_row["actual"]
+                label = "SMSF 100% Bitcoin" if fid == "smsf_btc" else get_fund_label(fid, funds)
                 opp_rows.append({
-                    "Fund": get_fund_label(fid, funds),
+                    "Fund": label,
                     "Estimated Balance Today": f"${alt_bal:,.0f}",
                     "vs Your Actual": f"{'+ ' if diff >= 0 else ''}{diff:,.0f}",
                 })
@@ -263,6 +350,95 @@ elif page == "Historical Performance":
             st.dataframe(opp_df, use_container_width=True, hide_index=True)
 
         st.markdown("---")
+
+    # --- SMSF Bitcoin What-If ---
+    if personal.current_balance > 0 and len(personal.contribution_history) >= 2:
+        btc_prices = load_btc_aud_monthly()
+        btc_result = smsf_btc_what_if(personal, btc_prices)
+        if btc_result:
+            st.markdown("### What If: SMSF 100% Bitcoin")
+            st.markdown(
+                "What if you'd run a **self-managed super fund** investing 100% in Bitcoin? "
+                "Your initial balance converted to BTC on day one, then monthly DCA of your "
+                "SG contributions into BTC — after realistic SMSF costs and exchange fees."
+            )
+
+            btc_val = btc_result["current_aud_value"]
+            btc_total = btc_result["total_btc"]
+            btc_contributed = btc_result["total_contributed_aud"]
+            btc_price = btc_result["current_btc_price"]
+            btc_gain = btc_val - btc_contributed
+
+            col_b1, col_b2, col_b3, col_b4 = st.columns(4)
+            with col_b1:
+                diff_vs_actual = btc_val - personal.current_balance
+                st.metric(
+                    label="SMSF BTC Value",
+                    value=f"${btc_val:,.0f}",
+                    delta=f"${abs(diff_vs_actual):,.0f} {'more' if diff_vs_actual >= 0 else 'less'} than actual",
+                    delta_color="normal" if diff_vs_actual >= 0 else "inverse",
+                )
+            with col_b2:
+                st.metric(label="BTC Accumulated", value=f"₿ {btc_total:.4f}")
+            with col_b3:
+                st.metric(label="Total Contributed", value=f"${btc_contributed:,.0f}")
+            with col_b4:
+                gain_pct = (btc_gain / btc_contributed) * 100 if btc_contributed > 0 else 0
+                st.metric(
+                    label="BTC Gain/Loss",
+                    value=f"${btc_gain:,.0f}",
+                    delta=f"{gain_pct:+.0f}% return",
+                    delta_color="normal" if btc_gain >= 0 else "inverse",
+                )
+
+            import plotly.graph_objects as go
+            fig_btc = go.Figure()
+
+            snap_dates = [s[0] for s in btc_result["snapshot_values"]]
+            snap_vals = [s[1] for s in btc_result["snapshot_values"]]
+
+            actual_bals = [
+                s.balance_at_date
+                for s in sorted(personal.contribution_history, key=lambda x: x.date)
+            ]
+
+            fig_btc.add_trace(go.Scatter(
+                x=snap_dates, y=actual_bals,
+                mode="lines+markers",
+                name="Future Super (Actual)",
+                line=dict(color="#E94F37", width=4),
+                marker=dict(size=8),
+                hovertemplate="%{x|%b %Y}: $%{y:,.0f}<extra>Your actual balance</extra>",
+            ))
+            fig_btc.add_trace(go.Scatter(
+                x=snap_dates, y=snap_vals,
+                mode="lines+markers",
+                name="SMSF 100% Bitcoin",
+                line=dict(color="#F7931A", width=3, dash="dot"),
+                marker=dict(size=6, symbol="diamond"),
+                hovertemplate="%{x|%b %Y}: $%{y:,.0f}<extra>SMSF Bitcoin</extra>",
+            ))
+            fig_btc.update_layout(
+                title="Your Super vs SMSF 100% Bitcoin",
+                xaxis_title="",
+                yaxis_title="Balance (AUD)",
+                template="plotly_white",
+                height=500,
+                hovermode="x unified",
+                yaxis_tickprefix="$",
+                yaxis_tickformat=",",
+            )
+            st.plotly_chart(fig_btc, use_container_width=True)
+
+            st.caption(
+                f"**Assumptions:** Monthly DCA at month-end BTC/AUD close price. "
+                f"SMSF costs: $3,318/yr (audit, accounting, ASIC, ATO). "
+                f"Exchange fee: 0.5% per trade. SG rate: {personal.sg_rate*100:.1f}%. "
+                f"Current BTC/AUD: ${btc_price:,.0f}. "
+                f"BTC prices sourced from exchangerates.org.uk. "
+                f"Past performance is not indicative of future results."
+            )
+            st.markdown("---")
 
     # --- Annualised Returns ---
     st.markdown("### Annualised Returns")

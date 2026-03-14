@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 import numpy as np
 import pandas as pd
@@ -296,4 +296,96 @@ def scenario_projections(
     return {
         name: project_balance_for_fund(profile, fee, return_pct, years)
         for name, return_pct in scenarios.items()
+    }
+
+
+SMSF_ANNUAL_COST = 3318  # audit $1k + accounting $2k + ASIC $59 + ATO levy $259
+EXCHANGE_FEE_PCT = 0.005  # 0.5% per BTC purchase
+
+
+def smsf_btc_what_if(
+    profile: PersonalProfile,
+    btc_prices: pd.DataFrame,
+    smsf_annual_cost: float = SMSF_ANNUAL_COST,
+    exchange_fee_pct: float = EXCHANGE_FEE_PCT,
+) -> dict:
+    """Model what the user's super would be worth if they ran a BTC-only SMSF.
+
+    Approach:
+    1. Start from first contribution snapshot — convert full balance to BTC.
+    2. Each month, contribute (salary * sg_rate / 12) minus SMSF running costs.
+    3. Buy BTC at that month's close price, less exchange fee.
+    4. Track cumulative BTC, AUD value at each snapshot date, and total contributed.
+
+    Returns dict with keys:
+        snapshot_values: list of (date, aud_value) aligned to contribution_history dates
+        total_btc: float
+        total_contributed_aud: float
+        current_aud_value: float
+        current_btc_price: float
+    """
+    snapshots = sorted(profile.contribution_history, key=lambda s: s.date)
+    if len(snapshots) < 2:
+        return {}
+
+    prices = btc_prices.copy()
+    prices["date"] = pd.to_datetime(prices["date"])
+    prices = prices.sort_values("date")
+
+    def _btc_price_for_date(d: date) -> float:
+        target = pd.Timestamp(d)
+        idx = prices["date"].searchsorted(target, side="right") - 1
+        idx = max(0, min(idx, len(prices) - 1))
+        return float(prices.iloc[idx]["btc_aud_close"])
+
+    initial_balance = snapshots[0].balance_at_date or 0
+    initial_price = _btc_price_for_date(snapshots[0].date)
+    initial_btc = (initial_balance * (1 - exchange_fee_pct)) / initial_price
+
+    total_btc = initial_btc
+    total_contributed = initial_balance
+    monthly_smsf_cost = smsf_annual_cost / 12
+
+    snapshot_values = [(snapshots[0].date, initial_balance)]
+
+    for i in range(len(snapshots) - 1):
+        s_start = snapshots[i]
+        s_end = snapshots[i + 1]
+        salary = s_start.annual_salary or profile.annual_salary
+        monthly_gross = salary * profile.sg_rate / 12
+
+        current = date(s_start.date.year, s_start.date.month, 1)
+        end = date(s_end.date.year, s_end.date.month, 1)
+
+        current_month = current
+        while True:
+            if current_month.month == 12:
+                next_month = date(current_month.year + 1, 1, 1)
+            else:
+                next_month = date(current_month.year, current_month.month + 1, 1)
+
+            if next_month > end:
+                break
+
+            current_month = next_month
+            net_contribution = monthly_gross - monthly_smsf_cost
+            if net_contribution > 0:
+                btc_price = _btc_price_for_date(current_month)
+                btc_bought = (net_contribution * (1 - exchange_fee_pct)) / btc_price
+                total_btc += btc_bought
+                total_contributed += net_contribution
+
+        end_price = _btc_price_for_date(s_end.date)
+        aud_value = total_btc * end_price
+        snapshot_values.append((s_end.date, round(aud_value, 2)))
+
+    latest_price = float(prices.iloc[-1]["btc_aud_close"])
+    current_value = total_btc * latest_price
+
+    return {
+        "snapshot_values": snapshot_values,
+        "total_btc": total_btc,
+        "total_contributed_aud": total_contributed,
+        "current_aud_value": round(current_value, 2),
+        "current_btc_price": latest_price,
     }
