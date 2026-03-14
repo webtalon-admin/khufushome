@@ -58,6 +58,6 @@
     }
   },
   "files": {
-    "includes": ["apps/**", "packages/**", "*.json", "*.yaml"]
+    "includes": ["apps/**", "packages/**", "*.json", "*.yaml", "!**/routeTree.gen.ts"]
   }
 }

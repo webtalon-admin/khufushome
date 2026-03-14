@@ -1,10 +1,19 @@
 import { khufusEnvPlugin } from "@khufushome/config/vite";
 import tailwindcss from "@tailwindcss/vite";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [khufusEnvPlugin(), react(), tailwindcss()],
+  plugins: [
+    khufusEnvPlugin(),
+    TanStackRouterVite({
+      routesDirectory: "./src/routes",
+      generatedRouteTree: "./src/routeTree.gen.ts",
+    }),
+    react(),
+    tailwindcss(),
+  ],
   server: { port: 5175 },
   build: { outDir: "dist" },
 });
