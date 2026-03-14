@@ -1,0 +1,11 @@
+fund_id,admin_fee_flat,admin_fee_pct,investment_fee_pct,performance_fee_pct,transaction_cost_pct,total_pct_approx,total_on_50k,total_on_100k,source
+future_super,60,0.36,0.92,0.00,0.04,1.28,700,1340,futuresuper.com.au + SuperGuide
+australian_super,52,0.10,0.52,0.10,0.04,0.69,387,742,AustralianSuper PDS Aug 2025 + MySuper Dashboard
+hostplus_balanced,78,0.00,0.61,0.41,0.08,1.23,668,1230,Hostplus PDS Jul 2025 + Morningstar
+hostplus_shares_plus,78,0.00,0.79,0.28,,1.07,535,1070,Morningstar MER 1.07%. 0.79% inv + 0.28% perf fee
+unisuper,96,0.00,0.50,,0.16,0.66,426,756,SuperGuide + unisuper.com.au
+art_high_growth,62.40,0.10,0.64,,0.06,0.70,487,862,australianretirementtrust.com.au
+aware_super,52,0.15,0.57,,0.07,0.64,452,842,aware.com.au fees Jun 2025
+hesta_high_growth,52,0.15,0.67,,0.05,0.72,487,922,HESTA Investment Choices PDS Sep 2025
+rest_super,78,0.10,0.47,0.05,0.09,0.56,408,738,rest.com.au + MySuper Dashboard
+vanguard_super,0,0.56,0.00,0.00,0.00,0.56,280,560,Vanguard PDS. Single all-in fee of 0.56%

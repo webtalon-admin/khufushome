@@ -1,0 +1,60 @@
+# =============================================================================
+# Personal Super Configuration
+# =============================================================================
+# Update this file with your actual details.
+# The app will use these values for personal comparisons and projections.
+# =============================================================================
+
+personal:
+  name: "Missaka Hemachandra"
+  age: 36  # UPDATE: your current age
+  retirement_age: 67  # target retirement age (preservation age is 60 for those born after 1/7/1964)
+  current_fund: "future_super"  # must match a fund id in funds.yaml
+
+  # Current balance with Future Super
+  current_balance: 119000  # UPDATE: your current super balance in dollars
+
+  # When you joined Future Super
+  join_date: "2020-05-10"  # UPDATE: approximate date you joined (YYYY-MM-DD)
+
+  # Annual salary (used to calculate employer SG contributions)
+  annual_salary: 180000  # UPDATE: your gross annual salary
+
+  # Superannuation Guarantee rate (11.5% from 1 Jul 2025, rising to 12% from 1 Jul 2026)
+  sg_rate: 0.125
+
+  # Additional voluntary contributions (per year, pre-tax salary sacrifice)
+  voluntary_contribution_annual: 0  # UPDATE: if you salary sacrifice or make extra contributions
+
+  # Contribution history (optional, for more accurate historical what-if modelling)
+  # Format: list of {date, balance} snapshots or {date, annual_salary} changes
+  # The more data points you provide, the more accurate the what-if comparison
+  contribution_history:
+    - date: "2020-10-01"
+      annual_salary: 120000
+      balance_at_date: 51653
+    - date: "2021-10-01"
+      annual_salary: 120000
+      balance_at_date: 68904
+    - date: "2022-10-01"
+      annual_salary: 120000
+      balance_at_date: 59938
+    - date: "2023-10-01"
+      annual_salary: 130000
+      balance_at_date: 76299
+    - date: "2024-10-01"
+      annual_salary: 130000
+      balance_at_date: 97189
+    - date: "2025-10-01"
+      annual_salary: 180000
+      balance_at_date: 120820
+    - date: "2026-03-14"
+      annual_salary: 180000
+      balance_at_date: 119000
+
+
+  # Assumptions for projections
+  assumptions:
+    inflation_rate: 0.03  # 3% long-term average
+    salary_growth_rate: 0.03  # 3% annual salary growth
+    sg_rate_future: 0.12  # SG will be 12% from 1 Jul 2026

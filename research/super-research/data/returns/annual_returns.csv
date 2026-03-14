@@ -1,0 +1,46 @@
+fund_id,fy,return_pct,return_type,source
+australian_super,FY2015,10.49,after_investment_fees,AustralianSuper archived data
+australian_super,FY2016,4.54,after_investment_fees,AustralianSuper 2016 Annual Report
+australian_super,FY2017,11.63,after_investment_fees,AustralianSuper archived data
+australian_super,FY2018,10.92,after_investment_fees,MySuper Dashboard
+australian_super,FY2019,8.49,after_investment_fees,MySuper Dashboard
+australian_super,FY2020,0.29,after_investment_fees,MySuper Dashboard
+australian_super,FY2021,20.20,after_investment_fees,MySuper Dashboard
+australian_super,FY2022,-2.97,after_investment_fees,MySuper Dashboard
+australian_super,FY2023,8.22,after_investment_fees,AustralianSuper / Financial Newswire
+australian_super,FY2024,8.46,after_investment_fees,AustralianSuper FY24 report
+australian_super,FY2025,9.52,after_investment_fees,AustralianSuper FY25 Annual Financial Report
+hostplus_balanced,FY2016,5.00,after_investment_fees,Hostplus 2016 Annual Report
+hostplus_balanced,FY2022,-1.45,after_investment_fees,Hostplus Annual Financial Report / SuperRatings
+hostplus_balanced,FY2023,8.69,after_investment_fees,Hostplus Annual Financial Report
+hostplus_balanced,FY2024,9.04,after_investment_fees,Hostplus FY24 report
+hostplus_balanced,FY2025,10.81,after_investment_fees,Hostplus FY25 Annual Financial Report
+rest_super,FY2016,1.64,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2017,10.89,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2018,8.57,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2019,5.76,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2020,-1.27,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2021,17.17,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2022,-2.64,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2023,9.00,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2024,8.42,after_all_fees_50k,Rest MySuper Dashboard
+rest_super,FY2025,9.59,after_all_fees_50k,Rest MySuper Dashboard
+hesta_high_growth,FY2025,12.00,after_investment_fees,HESTA historical performance PDF
+hesta_high_growth,FY2024,11.91,after_investment_fees,HESTA historical performance PDF
+hesta_balanced_growth,FY2016,2.90,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2017,10.76,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2018,10.34,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2019,7.04,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2020,-0.21,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2021,18.82,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2022,-2.06,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2023,9.29,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2024,8.81,after_all_fees_50k,HESTA MySuper Dashboard
+hesta_balanced_growth,FY2025,9.88,after_all_fees_50k,HESTA MySuper Dashboard
+aware_super,FY2023,10.70,after_investment_fees,Aware Super newsroom Jul 2023
+aware_super,FY2024,11.02,after_investment_fees,Aware Super newsroom Jul 2024
+aware_super,FY2025,11.88,after_investment_fees,Aware Super newsroom Jul 2025
+unisuper,FY2025,11.00,after_investment_fees,Chant West Top 10 Growth Funds (estimated)
+art_high_growth,FY2025,11.90,after_investment_fees,ART media release
+future_super,FY2023,8.54,after_investment_fees,Future Super blog (Balanced Impact legacy)
+future_super,FY2024,11.45,after_investment_fees,Future Super blog (Balanced Impact legacy)

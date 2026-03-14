@@ -1,0 +1,40 @@
+fund_id,period,return_pct,as_at,source
+future_super,since_inception,5.94,2025-05-23,futuresuper.com.au (legacy Balanced Impact)
+future_super,5yr,5.30,2025-05-23,futuresuper.com.au (legacy Balanced Impact)
+future_super,1yr,6.93,2025-05-23,futuresuper.com.au (legacy Balanced Impact)
+australian_super,1yr,9.47,2026-02-28,InvestSMART/Morningstar
+australian_super,3yr,9.48,2026-02-28,InvestSMART/Morningstar
+australian_super,5yr,7.73,2026-02-28,InvestSMART/Morningstar
+australian_super,10yr,8.74,2026-02-28,InvestSMART/Morningstar
+australian_super,20yr,7.34,2025-12-31,AustralianSuper
+hostplus_balanced,1yr,9.04,2026-01-31,InvestSMART/Morningstar
+hostplus_balanced,3yr,9.22,2026-01-31,InvestSMART/Morningstar
+hostplus_balanced,5yr,8.79,2026-01-31,InvestSMART/Morningstar
+hostplus_balanced,10yr,9.00,2026-01-31,InvestSMART/Morningstar
+hostplus_shares_plus,1yr,9.67,2026-01-31,InvestSMART/Morningstar
+hostplus_shares_plus,3yr,11.12,2026-01-31,InvestSMART/Morningstar
+hostplus_shares_plus,5yr,9.33,2026-01-31,InvestSMART/Morningstar
+hostplus_shares_plus,10yr,10.26,2026-01-31,InvestSMART/Morningstar
+unisuper,1yr,8.90,2025-03-31,unisuper.com.au
+unisuper,3yr,6.96,2025-03-31,unisuper.com.au
+unisuper,5yr,12.34,2025-03-31,unisuper.com.au
+unisuper,7yr,9.26,2025-03-31,unisuper.com.au
+unisuper,10yr,8.88,2025-03-31,unisuper.com.au
+art_high_growth,1yr,12.26,2025-09-30,australianretirementtrust.com.au
+art_high_growth,3yr,12.97,2025-09-30,australianretirementtrust.com.au
+art_high_growth,5yr,12.23,2025-09-30,australianretirementtrust.com.au
+art_high_growth,7yr,9.47,2025-09-30,australianretirementtrust.com.au
+art_high_growth,10yr,10.11,2025-09-30,australianretirementtrust.com.au
+aware_super,1yr,11.88,2025-06-30,Aware Super newsroom
+aware_super,5yr,8.88,2025-12-31,aware.com.au
+aware_super,10yr,9.27,2025-12-31,aware.com.au
+hesta_high_growth,1yr,12.00,2025-06-30,hesta.com.au
+hesta_high_growth,3yr,12.16,2025-06-30,hesta.com.au
+hesta_high_growth,5yr,11.54,2025-06-30,hesta.com.au
+hesta_high_growth,10yr,9.20,2025-06-30,hesta.com.au
+rest_super,1yr,9.23,2026-02-28,InvestSMART/Morningstar
+rest_super,3yr,9.65,2026-02-28,InvestSMART/Morningstar
+rest_super,5yr,7.72,2026-02-28,InvestSMART/Morningstar
+rest_super,10yr,7.76,2026-02-28,InvestSMART/Morningstar
+rest_super,since_inception,8.33,2025-06-30,rest.com.au
+vanguard_super,1yr,9.90,2025-12-31,SuperRatings (CY2025)
