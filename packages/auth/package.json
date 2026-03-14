@@ -6,14 +6,15 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "default": "./dist/index.js"
     },
     "./hooks": {
       "types": "./src/hooks/index.ts",
-      "default": "./src/hooks/index.ts"
+      "default": "./dist/hooks/index.js"
     }
   },
   "scripts": {
+    "build": "tsup",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

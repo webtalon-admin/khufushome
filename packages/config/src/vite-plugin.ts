@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
-import type { KhufusEnv } from "./env.ts";
-import { getEnv, loadConfig } from "./env.ts";
+import type { KhufusEnv } from "./env";
+import { getEnv, loadConfig } from "./env";
 
 const _thisDir = dirname(fileURLToPath(import.meta.url));
 
