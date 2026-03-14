@@ -17,7 +17,9 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration new",
-    "db:status": "supabase status"
+    "db:status": "supabase status",
+    "pipeline:seed": "cd scripts/super-pipeline && python seed.py",
+    "pipeline:apra": "cd scripts/super-pipeline && python ingest_apra.py"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
