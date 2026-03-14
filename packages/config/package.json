@@ -6,21 +6,22 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "default": "./dist/index.js"
     },
     "./vite": {
       "types": "./src/vite-plugin.ts",
-      "default": "./src/vite-plugin.ts"
+      "default": "./dist/vite-plugin.js"
     },
     "./client": {
       "types": "./src/client.ts",
-      "default": "./src/client.ts"
+      "default": "./dist/client.js"
     },
     "./tsconfig/base": "./tsconfig/base.json",
     "./tsconfig/react": "./tsconfig/react.json",
     "./tailwind/theme.css": "./tailwind/theme.css"
   },
   "scripts": {
+    "build": "tsup",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.4.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   }
