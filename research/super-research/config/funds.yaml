@@ -1,0 +1,120 @@
+funds:
+  - id: future_super
+    name: "Future Super"
+    option: "Sustainable Growth"
+    type: retail
+    aum_billions: 2.2
+    members: 55000
+    return_target: "CPI + 3.0%"
+    target_horizon_years: 12
+    growth_defensive_split: [85, 15]
+    website: "https://www.futuresuper.com.au"
+    notes: "Current fund. Restructured May 2025. For-profit retail fund. Ethical screens exclude fossil fuels, banks, weapons, tobacco, gambling."
+
+  - id: australian_super
+    name: "AustralianSuper"
+    option: "Balanced"
+    type: industry
+    aum_billions: 389
+    members: 3500000
+    return_target: "CPI + 3.8%"
+    target_horizon_years: 10
+    growth_defensive_split: [70, 30]
+    website: "https://www.australiansuper.com"
+    notes: "Australia's largest super fund. Low fees. Strong long-term track record since 1985."
+
+  - id: hostplus_balanced
+    name: "Hostplus"
+    option: "Balanced"
+    type: industry
+    aum_billions: 134.5
+    members: 1870000
+    return_target: "CPI + 2.5-3.0%"
+    target_horizon_years: 20
+    growth_defensive_split: [75, 25]
+    website: "https://hostplus.com.au"
+    notes: "Very high alternatives allocation (~32%). Originally hospitality/tourism sector."
+
+  - id: hostplus_shares_plus
+    name: "Hostplus"
+    option: "Shares Plus"
+    type: industry
+    aum_billions: 7.0
+    members: null
+    return_target: "Not specified"
+    target_horizon_years: 20
+    growth_defensive_split: [96, 4]
+    website: "https://hostplus.com.au"
+    notes: "Near-100% growth assets. Zero fixed income/cash. Highest 10yr returns but most volatile."
+
+  - id: unisuper
+    name: "UniSuper"
+    option: "Growth"
+    type: industry
+    aum_billions: 140
+    members: 680500
+    return_target: "CPI + 3.5%"
+    target_horizon_years: 7
+    growth_defensive_split: [80, 20]
+    website: "https://www.unisuper.com.au"
+    notes: "Significant internal management. Originally university sector. Low fees."
+
+  - id: art_high_growth
+    name: "Australian Retirement Trust"
+    option: "High Growth"
+    type: industry
+    aum_billions: 335
+    members: 2400000
+    return_target: "CPI + 4.0%"
+    target_horizon_years: 7
+    growth_defensive_split: [85, 15]
+    website: "https://www.australianretirementtrust.com.au"
+    notes: "2nd largest fund. Formed 2022 from Sunsuper + QSuper merger. High unlisted allocation (31.5%). #1 ranked growth fund over 10 years."
+
+  - id: aware_super
+    name: "Aware Super"
+    option: "High Growth"
+    type: industry
+    aum_billions: 210
+    members: 1100000
+    return_target: "CPI + 4.0%"
+    target_horizon_years: 10
+    growth_defensive_split: [88, 12]
+    website: "https://aware.com.au"
+    notes: "3rd largest fund. Default for members aged 55 and under. Whole-of-Fund model. ~25-30% unlisted assets."
+
+  - id: hesta_high_growth
+    name: "HESTA"
+    option: "High Growth"
+    type: industry
+    aum_billions: 100
+    members: 1085000
+    return_target: "CPI + 4.0%"
+    target_horizon_years: 10
+    growth_defensive_split: [82, 18]
+    website: "https://www.hesta.com.au"
+    notes: "Health & community services focus. ~80% women members. Strong responsible investment focus."
+
+  - id: rest_super
+    name: "Rest Super"
+    option: "Growth"
+    type: industry
+    aum_billions: 99
+    members: 2000000
+    return_target: "CPI + 3.0%"
+    target_horizon_years: 10
+    growth_defensive_split: [77, 23]
+    website: "https://rest.com.au"
+    notes: "Originally retail sector. 37-year track record since 1988. Formerly called Core Strategy."
+
+  - id: vanguard_super
+    name: "Vanguard Super"
+    option: "Growth"
+    type: retail
+    aum_billions: 3.2
+    members: 36374
+    return_target: "CPI + 3.25%"
+    target_horizon_years: 7
+    growth_defensive_split: [70, 30]
+    website: "https://www.vanguard.com.au"
+    notes: "100% passive/indexed. No unlisted assets. Lowest fees. Launched Oct 2022 — limited track record. Backed by Vanguard global ($14T AUM)."

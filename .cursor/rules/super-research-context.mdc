@@ -1,0 +1,94 @@
+# Super Fund Research Reference
+
+This rule provides context on the existing super fund research tool located at `research/super-research/`. This is a standalone Python/Streamlit project used for personal superannuation research. It is NOT part of the KhufusHome monorepo apps — it lives in the repo as a reference artifact only.
+
+When building the finance dashboard (`apps/finance`), use this research as the domain knowledge source.
+
+## What It Contains
+
+### Data (CSV files in `research/super-research/data/`)
+
+- **`returns/annual_returns.csv`** — Year-by-year fund returns (FY2016–FY2025) for all compared funds. After-investment-fees basis. Column: `fund_id, fy, return_pct, return_type, source`.
+- **`returns/annualised_returns.csv`** — Annualised returns across 1yr/3yr/5yr/7yr/10yr periods. Column: `fund_id, period, return_pct, as_at, source`.
+- **`allocations/asset_allocations.csv`** — Asset allocation breakdowns (AU equities, intl equities, property, infrastructure, private equity, alternatives, fixed income, cash).
+- **`fees/fee_structures.csv`** — Fee structures per fund: admin flat fee, admin %, investment fee %, performance fee %, transaction costs, total on $50k/$100k.
+- **`benchmarks/au_median_balance_by_age.csv`** — ATO median/average super balances by age group (male/female).
+
+### Config (YAML files in `research/super-research/config/`)
+
+- **`funds.yaml`** — Metadata for 10 funds: id, name, option, type (industry/retail), AUM, members, return target, growth/defensive split, website.
+- **`personal.yaml`** — User's personal profile: age, balance, salary, SG rate, contribution history (7 snapshots Oct 2020–Mar 2026), assumptions.
+
+### Research Papers (Markdown in `research/super-research/research/fund_papers/`)
+
+Detailed research papers for each of the 10 compared funds covering performance, fees, asset allocation, strengths/weaknesses, and sources. Plus a `master_comparison.md` with the full cross-fund analysis.
+
+### Funds Compared
+
+| ID | Fund | Option | Type |
+|---|---|---|---|
+| `future_super` | Future Super | Sustainable Growth | Retail (user's current) |
+| `australian_super` | AustralianSuper | Balanced | Industry |
+| `hostplus_balanced` | Hostplus | Balanced | Industry |
+| `hostplus_shares_plus` | Hostplus | Shares Plus | Industry |
+| `unisuper` | UniSuper | Growth | Industry |
+| `art_high_growth` | Australian Retirement Trust | High Growth | Industry |
+| `aware_super` | Aware Super | High Growth | Industry |
+| `hesta_high_growth` | HESTA | High Growth | Industry |
+| `rest_super` | Rest Super | Growth | Industry |
+| `vanguard_super` | Vanguard Super | Growth | Retail |
+
+## Architecture Patterns Worth Reusing
+
+When building `apps/finance`, these patterns from the research tool are worth adapting:
+
+### Data Models (`research/super-research/src/models.py`)
+- `FundConfig` — fund metadata (Pydantic). Map this to a Supabase table or Zod schema.
+- `FeeStructure` — fee model with `calculate_total_fee(balance)` method. The fee calculation logic (flat + percentage + performance + transaction) should be ported to the finance app.
+- `PersonalProfile` — user profile with derived properties (`years_to_retirement`, `annual_sg_contribution`, `total_annual_contribution`). These computations will be needed in the finance dashboard.
+- `ContributionSnapshot` — time-series balance snapshots. Consider a Supabase table for this.
+
+### Analysis Logic (`research/super-research/src/analysis.py`)
+- `project_balance()` — Forward projection engine: takes starting balance, contributions, return %, fees, salary growth and projects year-by-year. Core algorithm for the projections page.
+- `personal_what_if()` — Compares actual balance against hypothetical balances in alternative funds using real contribution history. The return resolver falls back through fund-specific data → nearby years → Chant West medians.
+- `fee_drag_over_time()` — Cumulative fee impact calculator. Shows how fees compound over decades.
+- `scenario_projections()` — Optimistic (10%), expected (8%), conservative (5.5%) scenario fan.
+
+### Chart Patterns (`research/super-research/src/charts.py`)
+- Uses Plotly throughout. The finance app should use Recharts (React) but the chart types and layouts are a good reference:
+  - Grouped bar for annualised returns by period
+  - Line chart for year-by-year returns
+  - Horizontal bar for fee comparison (sorted cheapest → most expensive)
+  - Stacked horizontal bar for asset allocation
+  - Line chart for projections and fee drag
+  - Fan chart for scenario analysis (optimistic/expected/conservative as dotted/solid/dashed)
+  - Personal what-if chart: bold solid line for actual fund, dotted lines for alternatives
+
+### Key Metric: Colour Palette
+```
+#2E86AB (blue), #A23B72 (magenta), #F18F01 (orange), #C73E1D (red),
+#3B1F2B (dark plum), #44BBA4 (teal), #E94F37 (coral), #393E41 (charcoal),
+#8ACB88 (green), #5C4D7D (purple), #D4A373 (tan)
+```
+
+## Key Research Findings (for finance app copy/content)
+
+- Future Super has the highest fees ($700/yr on $50k) and below-median returns historically
+- Switching to a top industry fund could save $150k–$250k+ over a working life
+- ART High Growth and Hostplus Shares Plus are the top 10yr performers (~10% p.a.)
+- AustralianSuper Balanced has the best fee-to-performance ratio among large funds
+- Higher unlisted/alternatives exposure correlates with higher returns but also higher fees
+- The SG rate assumption is 11.5% (current) moving to 12% (future legislated)
+- Australian benchmark data is from ATO 2021-22 Taxation Statistics
+
+## How to Run the Research Tool
+
+```bash
+cd research/super-research
+uv sync && uv run streamlit run app.py
+# Opens at http://localhost:8501
+```
+
+## Update Schedule
+
+The research data should be refreshed every 6 months. See `research/super-research/UPDATE_GUIDE.md` for the full checklist. Next update: September 2026.
