@@ -1,0 +1,327 @@
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-border);
+	}
+
+	html {
+		scroll-behavior: smooth;
+		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	body {
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		overflow-wrap: break-word;
+		min-height: 100svh;
+	}
+
+	img,
+	video,
+	svg {
+		max-width: 100%;
+		height: auto;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+}
+
+/*
+ * Light mode — clean white surfaces with purple accents.
+ * The primary purple matches the login page gradient tones.
+ */
+:root {
+	--radius: 0.625rem;
+
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.17 0.035 300);
+
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.17 0.035 300);
+
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.17 0.035 300);
+
+	/* Purple-700 — the hero button / primary action color */
+	--primary: oklch(0.496 0.265 294);
+	--primary-foreground: oklch(0.985 0 0);
+
+	/* Soft purple tint for secondary surfaces */
+	--secondary: oklch(0.965 0.012 300);
+	--secondary-foreground: oklch(0.25 0.06 300);
+
+	--muted: oklch(0.96 0.01 300);
+	--muted-foreground: oklch(0.52 0.025 300);
+
+	--accent: oklch(0.955 0.018 300);
+	--accent-foreground: oklch(0.25 0.06 300);
+
+	--destructive: oklch(0.577 0.245 27.325);
+	--destructive-foreground: oklch(0.985 0 0);
+
+	--border: oklch(0.925 0.012 300);
+	--input: oklch(0.925 0.012 300);
+	--ring: oklch(0.714 0.203 305.5);
+
+	/* Chart palette — purple-anchored with complementary hues */
+	--chart-1: oklch(0.558 0.288 302);
+	--chart-2: oklch(0.65 0.17 185);
+	--chart-3: oklch(0.45 0.14 270);
+	--chart-4: oklch(0.78 0.16 85);
+	--chart-5: oklch(0.62 0.22 350);
+
+	/* Sidebar — very light purple tint */
+	--sidebar: oklch(0.978 0.014 300);
+	--sidebar-foreground: oklch(0.17 0.035 300);
+	--sidebar-primary: oklch(0.496 0.265 294);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.955 0.018 300);
+	--sidebar-accent-foreground: oklch(0.25 0.06 300);
+	--sidebar-border: oklch(0.925 0.012 300);
+	--sidebar-ring: oklch(0.714 0.203 305.5);
+}
+
+/*
+ * Dark mode — deep purple-black inspired by the login page gradient
+ * (#1a0533 → #2d1b4e → #4a2065 → #6b2fa0).
+ */
+.dark {
+	--background: oklch(0.155 0.05 300);
+	--foreground: oklch(0.96 0.01 300);
+
+	--card: oklch(0.2 0.055 300);
+	--card-foreground: oklch(0.96 0.01 300);
+
+	--popover: oklch(0.2 0.055 300);
+	--popover-foreground: oklch(0.96 0.01 300);
+
+	/* Purple-400 — brighter primary on dark surfaces */
+	--primary: oklch(0.714 0.203 305.5);
+	--primary-foreground: oklch(0.155 0.05 300);
+
+	--secondary: oklch(0.25 0.06 300);
+	--secondary-foreground: oklch(0.96 0.01 300);
+
+	--muted: oklch(0.25 0.06 300);
+	--muted-foreground: oklch(0.62 0.04 300);
+
+	--accent: oklch(0.25 0.06 300);
+	--accent-foreground: oklch(0.96 0.01 300);
+
+	--destructive: oklch(0.577 0.245 27.325);
+	--destructive-foreground: oklch(0.96 0.01 300);
+
+	--border: oklch(0.3 0.055 300);
+	--input: oklch(0.3 0.055 300);
+	--ring: oklch(0.558 0.288 302);
+
+	--chart-1: oklch(0.714 0.203 305.5);
+	--chart-2: oklch(0.696 0.17 162.48);
+	--chart-3: oklch(0.78 0.16 85);
+	--chart-4: oklch(0.7 0.2 350);
+	--chart-5: oklch(0.6 0.24 277);
+
+	--sidebar: oklch(0.175 0.055 300);
+	--sidebar-foreground: oklch(0.96 0.01 300);
+	--sidebar-primary: oklch(0.609 0.278 302);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.25 0.06 300);
+	--sidebar-accent-foreground: oklch(0.96 0.01 300);
+	--sidebar-border: oklch(0.3 0.055 300);
+	--sidebar-ring: oklch(0.558 0.288 302);
+}
+
+/*
+ * AuthLayout animated background — twinkling stars & shooting stars.
+ * Used by the <AuthLayout> component in packages/ui.
+ */
+.auth-stars {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+	background-image:
+		radial-gradient(1px 1px at 10% 20%, rgba(233, 213, 255, 0.7), transparent),
+		radial-gradient(1.5px 1.5px at 50% 15%, rgba(216, 180, 254, 0.8), transparent),
+		radial-gradient(1px 1px at 70% 35%, rgba(192, 132, 252, 0.6), transparent),
+		radial-gradient(1px 1px at 85% 10%, rgba(233, 213, 255, 0.5), transparent),
+		radial-gradient(1.5px 1.5px at 15% 70%, rgba(216, 180, 254, 0.7), transparent),
+		radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.4), transparent),
+		radial-gradient(1px 1px at 60% 60%, rgba(233, 213, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 90% 75%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1.5px 1.5px at 5% 50%, rgba(192, 132, 252, 0.6), transparent),
+		radial-gradient(1px 1px at 35% 5%, rgba(255, 255, 255, 0.7), transparent),
+		radial-gradient(1px 1px at 75% 90%, rgba(216, 180, 254, 0.4), transparent),
+		radial-gradient(1px 1px at 25% 45%, rgba(255, 255, 255, 0.5), transparent);
+	animation:
+		auth-stars-appear 1.2s ease-out forwards,
+		auth-twinkle 4s 1.2s ease-in-out infinite alternate;
+}
+
+.auth-stars-2 {
+	background-image:
+		radial-gradient(1px 1px at 20% 30%, rgba(192, 132, 252, 0.6), transparent),
+		radial-gradient(1.5px 1.5px at 45% 55%, rgba(255, 255, 255, 0.4), transparent),
+		radial-gradient(1px 1px at 65% 25%, rgba(233, 213, 255, 0.7), transparent),
+		radial-gradient(1px 1px at 80% 50%, rgba(216, 180, 254, 0.5), transparent),
+		radial-gradient(1.5px 1.5px at 55% 85%, rgba(255, 255, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 30% 95%, rgba(192, 132, 252, 0.4), transparent),
+		radial-gradient(1px 1px at 92% 40%, rgba(233, 213, 255, 0.6), transparent),
+		radial-gradient(1px 1px at 8% 88%, rgba(255, 255, 255, 0.5), transparent),
+		radial-gradient(1.5px 1.5px at 72% 72%, rgba(216, 180, 254, 0.7), transparent);
+	animation:
+		auth-stars-appear 1.2s 0.4s ease-out forwards,
+		auth-twinkle 4s 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes auth-stars-appear {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+.auth-scene-fadein {
+	opacity: 0;
+	animation: auth-scene-fadein 1.5s 0.3s ease-out forwards;
+}
+
+@keyframes auth-scene-fadein {
+	from { opacity: 0; transform: translateY(10px); }
+	to { opacity: 0.7; transform: translateY(0); }
+}
+
+@keyframes auth-twinkle {
+	0% { opacity: 0.5; }
+	100% { opacity: 1; }
+}
+
+.auth-shooting-star {
+	position: absolute;
+	height: 2px;
+	border-radius: 1px;
+	background: linear-gradient(90deg, rgba(216, 180, 254, 0.9), rgba(192, 132, 252, 0.4), transparent);
+	transform: rotate(-35deg);
+	opacity: 0;
+	animation: auth-shoot 4s ease-out infinite;
+	animation-fill-mode: backwards;
+}
+
+.auth-shooting-star-1 {
+	width: 100px;
+	top: 12%;
+	right: 8%;
+	animation-delay: 1.5s;
+}
+
+.auth-shooting-star-2 {
+	width: 70px;
+	top: 28%;
+	right: 35%;
+	animation-delay: 3.5s;
+	animation-duration: 3.5s;
+}
+
+.auth-shooting-star-3 {
+	width: 55px;
+	top: 8%;
+	right: 58%;
+	animation-delay: 6s;
+	animation-duration: 3s;
+}
+
+.auth-shooting-star-4 {
+	width: 80px;
+	top: 45%;
+	right: 15%;
+	animation-delay: 8s;
+	animation-duration: 4.5s;
+}
+
+@keyframes auth-shoot {
+	0% {
+		opacity: 0;
+		transform: rotate(-35deg) translateX(0);
+	}
+	3% {
+		opacity: 1;
+	}
+	12% {
+		opacity: 0;
+		transform: rotate(-35deg) translateX(-250px);
+	}
+	100% {
+		opacity: 0;
+		transform: rotate(-35deg) translateX(-250px);
+	}
+}
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+
+	--animate-accordion-down: accordion-down 0.2s ease-out;
+	--animate-accordion-up: accordion-up 0.2s ease-out;
+
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+		to {
+			height: var(--radix-accordion-content-height);
+		}
+	}
+
+	@keyframes accordion-up {
+		from {
+			height: var(--radix-accordion-content-height);
+		}
+		to {
+			height: 0;
+		}
+	}
+}
