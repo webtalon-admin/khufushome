@@ -15,6 +15,7 @@ import type {
 	PipelineLog,
 	SuperAccount,
 	SuperAccountInsert,
+	YourSuperStatus,
 } from "./super-types";
 
 function supabase() {
@@ -262,6 +263,23 @@ export async function fetchFundFees(): Promise<FundFee[]> {
 
 	if (error) throw error;
 	return data as FundFee[];
+}
+
+// ── YourSuper Status ──────────────────────────────────────
+
+export async function fetchYourSuperStatus(
+	fundId: string,
+): Promise<YourSuperStatus | null> {
+	const { data, error } = await supabase()
+		.from("super_yoursuper_status")
+		.select("*")
+		.eq("fund_id", fundId)
+		.order("data_date", { ascending: false })
+		.limit(1)
+		.maybeSingle();
+
+	if (error) throw error;
+	return data as YourSuperStatus | null;
 }
 
 // ── BTC Prices ─────────────────────────────────────────────

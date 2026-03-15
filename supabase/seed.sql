@@ -100,7 +100,7 @@ insert into public.accounts (id, user_id, name, type, institution, is_active, me
   'super',
   'Future Super',
   true,
-  '{"fund_name": "Future Super", "investment_option": "Balanced Growth", "member_number": "000000"}'
+  '{"fund_name": "Future Super", "fund_id": "future_super", "investment_option": "Balanced Growth", "member_number": "000000"}'
 );
 
 -- Quarterly balance snapshots from research data (Oct 2020 – Mar 2025).
@@ -284,4 +284,20 @@ values
    'CPI + 3.25%', '{"growth": 70, "defensive": 30}', 'https://www.vanguard.com.au',
    '100% passive/indexed. Lowest fees. Launched Oct 2022.')
 on conflict (id) do nothing
+;
+
+-- Seed YourSuper performance test status for tracked funds (sample data for local dev)
+insert into public.super_yoursuper_status
+  (fund_id, assessment, net_return_pa, fees_pa_on_50k, ranking, data_date)
+values
+  ('australian_super', 'performing', 8.12, 347, 1, '2025-12-31'),
+  ('hostplus_balanced', 'performing', 7.89, 423, 2, '2025-12-31'),
+  ('unisuper', 'performing', 7.65, 312, 3, '2025-12-31'),
+  ('art_high_growth', 'performing', 8.45, 456, 4, '2025-12-31'),
+  ('aware_super', 'performing', 7.92, 389, 5, '2025-12-31'),
+  ('hesta_high_growth', 'performing', 7.54, 401, 6, '2025-12-31'),
+  ('rest_super', 'performing', 7.21, 367, 7, '2025-12-31'),
+  ('vanguard_super', 'performing', 7.45, 198, 8, '2025-12-31'),
+  ('future_super', 'performing', 6.89, 512, 9, '2025-12-31')
+on conflict (fund_id, data_date) do nothing
 ;

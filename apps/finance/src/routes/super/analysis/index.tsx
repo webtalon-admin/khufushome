@@ -5,6 +5,7 @@ import { AlertCircle, CalendarDays, DollarSign, Pencil, Plus, Trash2 } from "luc
 import { useMemo, useState } from "react";
 import { AuBenchmarkCard } from "../../../components/super/AuBenchmarkCard";
 import { ContributionFormDialog } from "../../../components/super/ContributionFormDialog";
+import { YourSuperBadge } from "../../../components/super/YourSuperBadge";
 import { SnapshotFormDialog } from "../../../components/super/SnapshotFormDialog";
 import { SuperNav } from "../../../components/super/SuperNav";
 import {
@@ -279,6 +280,8 @@ function SuperAnalysisOverviewPage() {
 					</CardContent>
 				</Card>
 			)}
+
+			<YourSuperBadge fundId={activeAccount?.metadata?.fund_id} />
 
 			<AuBenchmarkCard currentBalance={latest?.balance ?? null} />
 
