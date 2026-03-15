@@ -18,9 +18,11 @@ import {
 	Pencil,
 	Plus,
 	Trash2,
+	Upload,
 } from "lucide-react";
 import { useState } from "react";
 import { AccountFormDialog } from "../../components/accounts/AccountFormDialog";
+import { CsvImportDialog } from "../../components/transactions/CsvImportDialog";
 import { TransactionFormDialog } from "../../components/transactions/TransactionFormDialog";
 import {
 	archiveAccount,
@@ -60,6 +62,7 @@ function AccountDetailPage() {
 	const [editDialogOpen, setEditDialogOpen] = useState(false);
 	const [txnDialogOpen, setTxnDialogOpen] = useState(false);
 	const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
+	const [csvImportOpen, setCsvImportOpen] = useState(false);
 
 	const {
 		data: account,
@@ -287,6 +290,15 @@ function AccountDetailPage() {
 							variant="outline"
 							size="sm"
 							className="h-7 text-xs"
+							onClick={() => setCsvImportOpen(true)}
+						>
+							<Upload className="mr-1 size-3" />
+							Import
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							className="h-7 text-xs"
 							onClick={() => {
 								setEditingTxn(null);
 								setTxnDialogOpen(true);
@@ -449,6 +461,12 @@ function AccountDetailPage() {
 				defaultAccountId={id}
 				onSubmit={handleTxnSubmit}
 				isPending={createTxnMut.isPending || updateTxnMut.isPending}
+			/>
+
+			<CsvImportDialog
+				open={csvImportOpen}
+				onOpenChange={setCsvImportOpen}
+				defaultAccountId={id}
 			/>
 		</div>
 	);

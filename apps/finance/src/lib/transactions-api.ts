@@ -103,3 +103,81 @@ export async function fetchDistinctCategories(): Promise<string[]> {
 	const unique = [...new Set((data as { category: string }[]).map((r) => r.category))];
 	return unique;
 }
+
+// ── Bulk Import (with dedup via import_hash) ──────────────────
+
+export interface BulkImportRow {
+	account_id: string;
+	amount: number;
+	type: string;
+	category: string;
+	description: string | null;
+	date: string;
+	import_hash: string;
+}
+
+export interface BulkImportResult {
+	inserted: number;
+	duplicates: number;
+	errors: string[];
+}
+
+export async function fetchExistingHashes(
+	hashes: string[],
+): Promise<Set<string>> {
+	if (hashes.length === 0) return new Set();
+	const { data, error } = await supabase()
+		.from("transactions")
+		.select("import_hash")
+		.in("import_hash", hashes);
+	if (error) throw error;
+	return new Set(
+		(data as { import_hash: string | null }[])
+			.map((r) => r.import_hash)
+			.filter(Boolean) as string[],
+	);
+}
+
+const BATCH_SIZE = 100;
+
+export async function bulkImportTransactions(
+	rows: BulkImportRow[],
+): Promise<BulkImportResult> {
+	const {
+		data: { user },
+	} = await supabase().auth.getUser();
+	if (!user) throw new Error("Not authenticated");
+
+	const allHashes = rows.map((r) => r.import_hash);
+	const existing = await fetchExistingHashes(allHashes);
+
+	const toInsert: BulkImportRow[] = [];
+	let duplicates = 0;
+	for (const row of rows) {
+		if (existing.has(row.import_hash)) {
+			duplicates++;
+		} else {
+			toInsert.push(row);
+			existing.add(row.import_hash);
+		}
+	}
+
+	const errors: string[] = [];
+	let inserted = 0;
+
+	for (let i = 0; i < toInsert.length; i += BATCH_SIZE) {
+		const batch = toInsert.slice(i, i + BATCH_SIZE).map((r) => ({
+			...r,
+			user_id: user.id,
+		}));
+
+		const { error } = await supabase().from("transactions").insert(batch);
+		if (error) {
+			errors.push(`Batch ${Math.floor(i / BATCH_SIZE) + 1}: ${error.message}`);
+		} else {
+			inserted += batch.length;
+		}
+	}
+
+	return { inserted, duplicates, errors };
+}

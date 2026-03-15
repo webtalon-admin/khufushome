@@ -17,8 +17,10 @@ import {
 	Plus,
 	Search,
 	Trash2,
+	Upload,
 } from "lucide-react";
 import { useState } from "react";
+import { CsvImportDialog } from "../../components/transactions/CsvImportDialog";
 import { TransactionFormDialog } from "../../components/transactions/TransactionFormDialog";
 import { fetchAccounts } from "../../lib/accounts-api";
 import {
@@ -66,6 +68,7 @@ function TransactionsPage() {
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingTxn, setEditingTxn] = useState<Transaction | null>(null);
+	const [importOpen, setImportOpen] = useState(false);
 
 	const filters: TransactionFilters = {
 		...(filterType && { type: filterType }),
@@ -166,10 +169,16 @@ function TransactionsPage() {
 						{totalCount.toLocaleString()} transaction{totalCount !== 1 ? "s" : ""}
 					</p>
 				</div>
-				<Button onClick={handleNew}>
-					<Plus className="mr-1.5 size-4" />
-					Add Transaction
-				</Button>
+				<div className="flex gap-2">
+					<Button variant="outline" onClick={() => setImportOpen(true)}>
+						<Upload className="mr-1.5 size-4" />
+						Import CSV
+					</Button>
+					<Button onClick={handleNew}>
+						<Plus className="mr-1.5 size-4" />
+						Add Transaction
+					</Button>
+				</div>
 			</div>
 
 			{/* Filters */}
@@ -431,6 +440,11 @@ function TransactionsPage() {
 				transaction={editingTxn}
 				onSubmit={handleSubmit}
 				isPending={createMut.isPending || updateMut.isPending}
+			/>
+
+			<CsvImportDialog
+				open={importOpen}
+				onOpenChange={setImportOpen}
 			/>
 		</div>
 	);
