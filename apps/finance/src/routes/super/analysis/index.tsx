@@ -20,7 +20,7 @@ export const Route = createFileRoute("/super/analysis/")({
 	component: SuperAnalysisOverviewPage,
 });
 
-const TEMP_SUPER_ACCOUNT_ID = "00000000-0000-0000-0000-000000000000";
+const TEMP_SUPER_ACCOUNT_ID = "00000000-0000-0000-0000-000000000001";
 
 function fmtCurrency(n: number | null | undefined): string {
 	if (n == null) return "—";
