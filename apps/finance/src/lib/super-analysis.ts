@@ -28,8 +28,8 @@ function addMonths(d: Date, n: number): Date {
 	return result;
 }
 
-function monthKey(d: Date): string {
-	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+function dateKey(d: Date): string {
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 /**
@@ -193,19 +193,30 @@ export function smsfBtcWhatIf(
 		a.recorded_date.localeCompare(b.recorded_date),
 	);
 
-	const priceMap = new Map(btcPrices.map((p) => [p.month, p.btc_aud_close]));
+	const priceMap = new Map(
+		btcPrices.map((p) => [p.price_date, p.btc_aud_close]),
+	);
 	const pricesSorted = [...btcPrices].sort((a, b) =>
-		a.month.localeCompare(b.month),
+		a.price_date.localeCompare(b.price_date),
 	);
 
 	function btcPriceForDate(d: Date): number {
-		const key = monthKey(d);
-		if (priceMap.has(key)) return priceMap.get(key)!;
+		// Try exact date first (e.g. 15th of month for contributions)
+		const exact = dateKey(d);
+		if (priceMap.has(exact)) return priceMap.get(exact)!;
 
-		// Find the last price on or before this date
+		// Try the 15th of same month (contribution date)
+		const mid = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-15`;
+		if (priceMap.has(mid)) return priceMap.get(mid)!;
+
+		// Fallback to 1st of month
+		const first = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+		if (priceMap.has(first)) return priceMap.get(first)!;
+
+		// Last resort: closest price on or before this date
 		let bestPrice = pricesSorted[0].btc_aud_close;
 		for (const p of pricesSorted) {
-			if (p.month <= key) bestPrice = p.btc_aud_close;
+			if (p.price_date <= exact) bestPrice = p.btc_aud_close;
 			else break;
 		}
 		return bestPrice;
@@ -237,10 +248,16 @@ export function smsfBtcWhatIf(
 
 		for (let m = 1; m <= months; m++) {
 			const monthDate = addMonths(startDate, m);
+			// Use 15th of the month as the contribution/buy date
+			const buyDate = new Date(
+				monthDate.getFullYear(),
+				monthDate.getMonth(),
+				15,
+			);
 			const netContribution = monthlyGross - monthlySMSFCost;
 
 			if (netContribution > 0) {
-				const price = btcPriceForDate(monthDate);
+				const price = btcPriceForDate(buyDate);
 				const btcBought =
 					(netContribution * (1 - exchangeFeePct)) / price;
 				totalBtc += btcBought;
@@ -253,7 +270,7 @@ export function smsfBtcWhatIf(
 		snapshotValues.push({ date: sEnd.recorded_date, audValue });
 	}
 
-	const latestPrice = pricesSorted[pricesSorted.length - 1].btc_aud_close;
+	const latestPrice = pricesSorted.at(-1)!.btc_aud_close;
 	const currentAudValue = Math.round(totalBtc * latestPrice * 100) / 100;
 
 	return {

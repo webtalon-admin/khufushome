@@ -111,8 +111,8 @@ export async function fetchFundFees(): Promise<FundFee[]> {
 export async function fetchBtcPrices(): Promise<BtcPriceMonthly[]> {
 	const { data, error } = await supabase()
 		.from("btc_price_monthly")
-		.select("month, btc_aud_close")
-		.order("month");
+		.select("price_date, btc_aud_close")
+		.order("price_date");
 
 	if (error) throw error;
 	return data as BtcPriceMonthly[];

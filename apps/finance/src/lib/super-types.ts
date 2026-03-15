@@ -51,7 +51,7 @@ export interface FundFee {
 }
 
 export interface BtcPriceMonthly {
-	month: string;
+	price_date: string;
 	btc_aud_close: number;
 }
 

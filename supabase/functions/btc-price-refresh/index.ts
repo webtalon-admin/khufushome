@@ -6,27 +6,39 @@ interface MarketChartResponse {
 	prices: [number, number][]; // [timestamp_ms, price]
 }
 
-function monthStart(d: Date): string {
-	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+function dateKey(d: Date): string {
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function extractMonthlyCloses(
+function extractPricesForDates(
 	prices: [number, number][],
-): { month: string; btc_aud_close: number }[] {
-	const byMonth = new Map<string, number>();
+): { price_date: string; btc_aud_close: number }[] {
+	// Extract the closest price to the 1st and 15th of each month
+	const byDate = new Map<string, number>();
 
 	for (const [ts, price] of prices) {
 		const d = new Date(ts);
-		const key = monthStart(d);
-		byMonth.set(key, price);
+		const day = d.getDate();
+		const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+		// Closest to 1st: use days 1-3
+		if (day >= 1 && day <= 3) {
+			const key = `${ym}-01`;
+			byDate.set(key, price);
+		}
+		// Closest to 15th: use days 14-16
+		if (day >= 14 && day <= 16) {
+			const key = `${ym}-15`;
+			byDate.set(key, price);
+		}
 	}
 
-	return Array.from(byMonth.entries())
-		.map(([month, price]) => ({
-			month,
+	return Array.from(byDate.entries())
+		.map(([price_date, price]) => ({
+			price_date,
 			btc_aud_close: Math.round(price * 100) / 100,
 		}))
-		.sort((a, b) => a.month.localeCompare(b.month));
+		.sort((a, b) => a.price_date.localeCompare(b.price_date));
 }
 
 Deno.serve(async (_req) => {
@@ -43,7 +55,7 @@ Deno.serve(async (_req) => {
 		});
 
 		// Historical data (Oct 2020 - Mar 2026) is seeded via migration.
-		// This function only fetches the last 90 days to pick up new months.
+		// This function fetches the last 90 days to pick up new 1st/15th prices.
 		// CoinGecko free tier allows up to 365 days of lookback.
 		const url = `${COINGECKO_API}/coins/bitcoin/market_chart?vs_currency=aud&days=90&precision=2`;
 		console.log("Fetching last 90 days of BTC/AUD prices from CoinGecko...");
@@ -59,9 +71,9 @@ Deno.serve(async (_req) => {
 		const data: MarketChartResponse = await response.json();
 		console.log(`Received ${data.prices.length} data points`);
 
-		const monthlyPrices = extractMonthlyCloses(data.prices);
+		const monthlyPrices = extractPricesForDates(data.prices);
 		console.log(
-			`Extracted ${monthlyPrices.length} monthly close prices (${monthlyPrices[0]?.month} to ${monthlyPrices.at(-1)?.month})`,
+			`Extracted ${monthlyPrices.length} prices (1st+15th) (${monthlyPrices[0]?.price_date} to ${monthlyPrices.at(-1)?.price_date})`,
 		);
 
 		if (monthlyPrices.length > 0) {
@@ -71,7 +83,7 @@ Deno.serve(async (_req) => {
 			}));
 			const { error } = await sb
 				.from("btc_price_monthly")
-				.upsert(rows, { onConflict: "month" });
+				.upsert(rows, { onConflict: "price_date" });
 			if (error) throw new Error(`Supabase upsert error: ${error.message}`);
 		}
 
@@ -86,10 +98,10 @@ Deno.serve(async (_req) => {
 		return new Response(
 			JSON.stringify({
 				ok: true,
-				months: monthlyPrices.length,
+				prices: monthlyPrices.length,
 				range: {
-					from: monthlyPrices[0]?.month,
-					to: monthlyPrices.at(-1)?.month,
+					from: monthlyPrices[0]?.price_date,
+					to: monthlyPrices.at(-1)?.price_date,
 				},
 			}),
 			{ headers: { "Content-Type": "application/json" }, status: 200 },
