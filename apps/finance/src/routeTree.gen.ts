@@ -28,12 +28,11 @@ import { Route as BudgetForecastRouteImport } from './routes/budget/forecast'
 import { Route as AccountsIdRouteImport } from './routes/accounts/$id'
 import { Route as SuperResearchIndexRouteImport } from './routes/super/research/index'
 import { Route as SuperAnalysisIndexRouteImport } from './routes/super/analysis/index'
+import { Route as SuperResearchPapersRouteImport } from './routes/super/research/papers'
 import { Route as SuperResearchFeesRouteImport } from './routes/super/research/fees'
 import { Route as SuperResearchAllocationsRouteImport } from './routes/super/research/allocations'
 import { Route as SuperAnalysisProjectionsRouteImport } from './routes/super/analysis/projections'
 import { Route as SuperAnalysisHistoricalRouteImport } from './routes/super/analysis/historical'
-import { Route as SuperResearchPapersIndexRouteImport } from './routes/super/research/papers/index'
-import { Route as SuperResearchPapersIdRouteImport } from './routes/super/research/papers/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -130,6 +129,11 @@ const SuperAnalysisIndexRoute = SuperAnalysisIndexRouteImport.update({
   path: '/super/analysis/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuperResearchPapersRoute = SuperResearchPapersRouteImport.update({
+  id: '/super/research/papers',
+  path: '/super/research/papers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperResearchFeesRoute = SuperResearchFeesRouteImport.update({
   id: '/super/research/fees',
   path: '/super/research/fees',
@@ -150,17 +154,6 @@ const SuperAnalysisProjectionsRoute =
 const SuperAnalysisHistoricalRoute = SuperAnalysisHistoricalRouteImport.update({
   id: '/super/analysis/historical',
   path: '/super/analysis/historical',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SuperResearchPapersIndexRoute =
-  SuperResearchPapersIndexRouteImport.update({
-    id: '/super/research/papers/',
-    path: '/super/research/papers/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SuperResearchPapersIdRoute = SuperResearchPapersIdRouteImport.update({
-  id: '/super/research/papers/$id',
-  path: '/super/research/papers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -186,10 +179,9 @@ export interface FileRoutesByFullPath {
   '/super/analysis/projections': typeof SuperAnalysisProjectionsRoute
   '/super/research/allocations': typeof SuperResearchAllocationsRoute
   '/super/research/fees': typeof SuperResearchFeesRoute
+  '/super/research/papers': typeof SuperResearchPapersRoute
   '/super/analysis/': typeof SuperAnalysisIndexRoute
   '/super/research/': typeof SuperResearchIndexRoute
-  '/super/research/papers/$id': typeof SuperResearchPapersIdRoute
-  '/super/research/papers/': typeof SuperResearchPapersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -213,10 +205,9 @@ export interface FileRoutesByTo {
   '/super/analysis/projections': typeof SuperAnalysisProjectionsRoute
   '/super/research/allocations': typeof SuperResearchAllocationsRoute
   '/super/research/fees': typeof SuperResearchFeesRoute
+  '/super/research/papers': typeof SuperResearchPapersRoute
   '/super/analysis': typeof SuperAnalysisIndexRoute
   '/super/research': typeof SuperResearchIndexRoute
-  '/super/research/papers/$id': typeof SuperResearchPapersIdRoute
-  '/super/research/papers': typeof SuperResearchPapersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,10 +232,9 @@ export interface FileRoutesById {
   '/super/analysis/projections': typeof SuperAnalysisProjectionsRoute
   '/super/research/allocations': typeof SuperResearchAllocationsRoute
   '/super/research/fees': typeof SuperResearchFeesRoute
+  '/super/research/papers': typeof SuperResearchPapersRoute
   '/super/analysis/': typeof SuperAnalysisIndexRoute
   '/super/research/': typeof SuperResearchIndexRoute
-  '/super/research/papers/$id': typeof SuperResearchPapersIdRoute
-  '/super/research/papers/': typeof SuperResearchPapersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -270,10 +260,9 @@ export interface FileRouteTypes {
     | '/super/analysis/projections'
     | '/super/research/allocations'
     | '/super/research/fees'
+    | '/super/research/papers'
     | '/super/analysis/'
     | '/super/research/'
-    | '/super/research/papers/$id'
-    | '/super/research/papers/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -297,10 +286,9 @@ export interface FileRouteTypes {
     | '/super/analysis/projections'
     | '/super/research/allocations'
     | '/super/research/fees'
+    | '/super/research/papers'
     | '/super/analysis'
     | '/super/research'
-    | '/super/research/papers/$id'
-    | '/super/research/papers'
   id:
     | '__root__'
     | '/'
@@ -324,10 +312,9 @@ export interface FileRouteTypes {
     | '/super/analysis/projections'
     | '/super/research/allocations'
     | '/super/research/fees'
+    | '/super/research/papers'
     | '/super/analysis/'
     | '/super/research/'
-    | '/super/research/papers/$id'
-    | '/super/research/papers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -352,10 +339,9 @@ export interface RootRouteChildren {
   SuperAnalysisProjectionsRoute: typeof SuperAnalysisProjectionsRoute
   SuperResearchAllocationsRoute: typeof SuperResearchAllocationsRoute
   SuperResearchFeesRoute: typeof SuperResearchFeesRoute
+  SuperResearchPapersRoute: typeof SuperResearchPapersRoute
   SuperAnalysisIndexRoute: typeof SuperAnalysisIndexRoute
   SuperResearchIndexRoute: typeof SuperResearchIndexRoute
-  SuperResearchPapersIdRoute: typeof SuperResearchPapersIdRoute
-  SuperResearchPapersIndexRoute: typeof SuperResearchPapersIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -493,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperAnalysisIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/super/research/papers': {
+      id: '/super/research/papers'
+      path: '/super/research/papers'
+      fullPath: '/super/research/papers'
+      preLoaderRoute: typeof SuperResearchPapersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/super/research/fees': {
       id: '/super/research/fees'
       path: '/super/research/fees'
@@ -521,20 +514,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperAnalysisHistoricalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/super/research/papers/': {
-      id: '/super/research/papers/'
-      path: '/super/research/papers'
-      fullPath: '/super/research/papers/'
-      preLoaderRoute: typeof SuperResearchPapersIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/super/research/papers/$id': {
-      id: '/super/research/papers/$id'
-      path: '/super/research/papers/$id'
-      fullPath: '/super/research/papers/$id'
-      preLoaderRoute: typeof SuperResearchPapersIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -560,10 +539,9 @@ const rootRouteChildren: RootRouteChildren = {
   SuperAnalysisProjectionsRoute: SuperAnalysisProjectionsRoute,
   SuperResearchAllocationsRoute: SuperResearchAllocationsRoute,
   SuperResearchFeesRoute: SuperResearchFeesRoute,
+  SuperResearchPapersRoute: SuperResearchPapersRoute,
   SuperAnalysisIndexRoute: SuperAnalysisIndexRoute,
   SuperResearchIndexRoute: SuperResearchIndexRoute,
-  SuperResearchPapersIdRoute: SuperResearchPapersIdRoute,
-  SuperResearchPapersIndexRoute: SuperResearchPapersIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
