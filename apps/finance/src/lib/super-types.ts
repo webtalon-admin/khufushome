@@ -78,10 +78,26 @@ export const SMSF_DEFAULTS = {
 
 export interface SuperAccountMetadata {
 	fund_name: string;
+	fund_id?: string;
 	member_number?: string;
 	investment_option?: string;
 	insurance_premiums_monthly?: number;
 	admin_fee_monthly?: number;
+}
+
+// ── YourSuper Status ─────────────────────────────────────
+
+export type YourSuperAssessment = "performing" | "underperforming" | "not_assessed";
+
+export interface YourSuperStatus {
+	id: string;
+	fund_id: string;
+	assessment: YourSuperAssessment;
+	net_return_pa: number | null;
+	fees_pa_on_50k: number | null;
+	ranking: number | null;
+	data_date: string;
+	fetched_at: string;
 }
 
 export interface SuperAccount {

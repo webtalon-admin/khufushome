@@ -8,7 +8,9 @@ import {
 	DialogTitle,
 	Input,
 } from "@khufushome/ui";
+import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
+import { fetchFundReferences } from "../../lib/super-api";
 import type {
 	SuperAccount,
 	SuperAccountInsert,
@@ -34,21 +36,30 @@ export function SuperAccountDialog({
 
 	const [name, setName] = useState("");
 	const [fundName, setFundName] = useState("");
+	const [fundRefId, setFundRefId] = useState("");
 	const [memberNumber, setMemberNumber] = useState("");
 	const [investmentOption, setInvestmentOption] = useState("");
 	const [institution, setInstitution] = useState("");
+
+	const { data: fundRefs = [] } = useQuery({
+		queryKey: ["fund-references"],
+		queryFn: fetchFundReferences,
+		staleTime: 1000 * 60 * 60,
+	});
 
 	useEffect(() => {
 		if (open) {
 			if (account) {
 				setName(account.name);
 				setFundName(account.metadata.fund_name ?? "");
+				setFundRefId(account.metadata.fund_id ?? "");
 				setMemberNumber(account.metadata.member_number ?? "");
 				setInvestmentOption(account.metadata.investment_option ?? "");
 				setInstitution(account.institution ?? "");
 			} else {
 				setName("");
 				setFundName("");
+				setFundRefId("");
 				setMemberNumber("");
 				setInvestmentOption("");
 				setInstitution("");
@@ -63,6 +74,7 @@ export function SuperAccountDialog({
 		const metadata: SuperAccountMetadata = {
 			fund_name: fundName.trim(),
 		};
+		if (fundRefId) metadata.fund_id = fundRefId;
 		if (memberNumber.trim()) metadata.member_number = memberNumber.trim();
 		if (investmentOption.trim())
 			metadata.investment_option = investmentOption.trim();
@@ -125,20 +137,47 @@ export function SuperAccountDialog({
 							/>
 						</div>
 
+					{fundRefs.length > 0 && (
 						<div className="space-y-1.5">
 							<label
-								htmlFor="investment-option"
+								htmlFor="fund-ref-id"
 								className="text-sm font-medium text-foreground"
 							>
-								Investment Option
+								Link to Tracked Fund
 							</label>
-							<Input
-								id="investment-option"
-								placeholder="e.g. Balanced Growth, High Growth"
-								value={investmentOption}
-								onChange={(e) => setInvestmentOption(e.target.value)}
-							/>
+							<select
+								id="fund-ref-id"
+								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								value={fundRefId}
+								onChange={(e) => setFundRefId(e.target.value)}
+							>
+								<option value="">— None (optional) —</option>
+								{fundRefs.map((ref) => (
+									<option key={ref.id} value={ref.id}>
+										{ref.name} — {ref.option_name}
+									</option>
+								))}
+							</select>
+							<p className="text-xs text-muted-foreground">
+								Links this account to ATO YourSuper performance data
+							</p>
 						</div>
+					)}
+
+					<div className="space-y-1.5">
+						<label
+							htmlFor="investment-option"
+							className="text-sm font-medium text-foreground"
+						>
+							Investment Option
+						</label>
+						<Input
+							id="investment-option"
+							placeholder="e.g. Balanced Growth, High Growth"
+							value={investmentOption}
+							onChange={(e) => setInvestmentOption(e.target.value)}
+						/>
+					</div>
 
 						<div className="grid grid-cols-2 gap-3">
 							<div className="space-y-1.5">
