@@ -114,20 +114,21 @@ export function personalWhatIf(
 
 	const results: WhatIfPoint[] = [];
 	const altBalances: Record<string, number> = {};
+	const first = sorted[0]!;
 
 	for (const fid of fundIds) {
-		altBalances[fid] = sorted[0].balance;
+		altBalances[fid] = first.balance;
 	}
 
 	results.push({
-		date: sorted[0].recorded_date,
-		actual: sorted[0].balance,
-		...Object.fromEntries(fundIds.map((fid) => [fid, sorted[0].balance])),
+		date: first.recorded_date,
+		actual: first.balance,
+		...Object.fromEntries(fundIds.map((fid) => [fid, first.balance])),
 	});
 
 	for (let i = 0; i < sorted.length - 1; i++) {
-		const s = sorted[i];
-		const e = sorted[i + 1];
+		const s = sorted[i]!;
+		const e = sorted[i + 1]!;
 		const startDate = parseDate(s.recorded_date);
 		const endDate = parseDate(e.recorded_date);
 		const daysBetween =
@@ -143,7 +144,7 @@ export function personalWhatIf(
 		};
 
 		for (const fid of fundIds) {
-			const prevBal = altBalances[fid];
+			const prevBal = altBalances[fid] ?? 0;
 			const retPct = resolveQuarterlyReturn(
 				returnLookup.get(fid),
 				startDate,
@@ -209,7 +210,7 @@ export function smsfBtcWhatIf(
 		if (priceMap.has(mid)) return priceMap.get(mid)!;
 
 		// Fallback: closest price on or before this date
-		let bestPrice = pricesSorted[0].btc_aud_close;
+		let bestPrice = pricesSorted[0]!.btc_aud_close;
 		for (const p of pricesSorted) {
 			if (p.price_date <= exact) bestPrice = p.btc_aud_close;
 			else break;
@@ -217,8 +218,9 @@ export function smsfBtcWhatIf(
 		return bestPrice;
 	}
 
-	const initialBalance = sorted[0].balance;
-	const initialDate = parseDate(sorted[0].recorded_date);
+	const first = sorted[0]!;
+	const initialBalance = first.balance;
+	const initialDate = parseDate(first.recorded_date);
 	const initialPrice = btcPriceForDate(initialDate);
 	const initialBtc = (initialBalance * (1 - exchangeFeePct)) / initialPrice;
 
@@ -227,12 +229,12 @@ export function smsfBtcWhatIf(
 	const monthlySMSFCost = smsfAnnualCost / 12;
 
 	const snapshotValues: SmsfBtcResult["snapshotValues"] = [
-		{ date: sorted[0].recorded_date, audValue: initialBalance },
+		{ date: first.recorded_date, audValue: initialBalance },
 	];
 
 	for (let i = 0; i < sorted.length - 1; i++) {
-		const sStart = sorted[i];
-		const sEnd = sorted[i + 1];
+		const sStart = sorted[i]!;
+		const sEnd = sorted[i + 1]!;
 		const startDate = parseDate(sStart.recorded_date);
 		const endDate = parseDate(sEnd.recorded_date);
 
@@ -243,7 +245,6 @@ export function smsfBtcWhatIf(
 
 		for (let m = 1; m <= months; m++) {
 			const monthDate = addMonths(startDate, m);
-			// Use 15th of the month as the contribution/buy date
 			const buyDate = new Date(
 				monthDate.getFullYear(),
 				monthDate.getMonth(),
@@ -265,7 +266,7 @@ export function smsfBtcWhatIf(
 		snapshotValues.push({ date: sEnd.recorded_date, audValue });
 	}
 
-	const latestPrice = pricesSorted.at(-1)!.btc_aud_close;
+	const latestPrice = pricesSorted[pricesSorted.length - 1]!.btc_aud_close;
 	const currentAudValue = Math.round(totalBtc * latestPrice * 100) / 100;
 
 	return {

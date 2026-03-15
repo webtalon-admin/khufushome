@@ -69,10 +69,10 @@ function SuperHistoricalPage() {
 	);
 	const [showSmsfBtc, setShowSmsfBtc] = useState(true);
 	const [showAssumptions, setShowAssumptions] = useState(false);
-	const [smsfAnnualCost, setSmsfAnnualCost] = useState(
+	const [smsfAnnualCost, setSmsfAnnualCost] = useState<number>(
 		SMSF_DEFAULTS.annualCost,
 	);
-	const [exchangeFeePct, setExchangeFeePct] = useState(
+	const [exchangeFeePct, setExchangeFeePct] = useState<number>(
 		SMSF_DEFAULTS.exchangeFeePct * 100,
 	);
 
@@ -456,13 +456,14 @@ function SuperHistoricalPage() {
 												</th>
 											</tr>
 										</thead>
-										<tbody>
-											{allLineKeys.map((key) => {
-												const lastPoint = chartData[chartData.length - 1];
-												const value = lastPoint[key] as number | undefined;
-												if (value == null) return null;
-												const diff =
-													key === "actual" ? 0 : value - lastPoint.actual;
+									<tbody>
+										{allLineKeys.map((key) => {
+											const lastPoint = chartData[chartData.length - 1];
+											if (!lastPoint) return null;
+											const value = (lastPoint as Record<string, unknown>)[key] as number | undefined;
+											if (value == null) return null;
+											const diff =
+												key === "actual" ? 0 : value - lastPoint.actual;
 												return (
 													<tr
 														key={key}
