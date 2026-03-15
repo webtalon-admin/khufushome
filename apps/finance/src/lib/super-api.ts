@@ -7,6 +7,7 @@ import type {
 	Contribution,
 	ContributionInsert,
 	ContributionUpdate,
+	FundAllocation,
 	FundFee,
 	FundReference,
 	FundReturn,
@@ -252,6 +253,17 @@ export async function fetchFundReturns(
 	const { data, error } = await query;
 	if (error) throw error;
 	return data as FundReturn[];
+}
+
+export async function fetchFundAllocations(): Promise<FundAllocation[]> {
+	const { data, error } = await supabase()
+		.from("super_fund_allocations")
+		.select(
+			"fund_id, australian_equities, international_equities, property, infrastructure, private_equity, alternatives, fixed_income, cash",
+		);
+
+	if (error) throw error;
+	return data as FundAllocation[];
 }
 
 export async function fetchFundFees(): Promise<FundFee[]> {

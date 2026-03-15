@@ -50,6 +50,53 @@ export interface FundFee {
 	transaction_cost_pct: number | null;
 }
 
+export interface FundAllocation {
+	fund_id: string;
+	australian_equities: number | null;
+	international_equities: number | null;
+	property: number | null;
+	infrastructure: number | null;
+	private_equity: number | null;
+	alternatives: number | null;
+	fixed_income: number | null;
+	cash: number | null;
+}
+
+export const ASSET_CLASSES = [
+	"australian_equities",
+	"international_equities",
+	"property",
+	"infrastructure",
+	"private_equity",
+	"alternatives",
+	"fixed_income",
+	"cash",
+] as const;
+
+export type AssetClass = (typeof ASSET_CLASSES)[number];
+
+export const ASSET_CLASS_LABELS: Record<AssetClass, string> = {
+	australian_equities: "AU Equities",
+	international_equities: "Intl Equities",
+	property: "Property",
+	infrastructure: "Infrastructure",
+	private_equity: "Private Equity",
+	alternatives: "Alternatives",
+	fixed_income: "Fixed Income",
+	cash: "Cash",
+};
+
+export const GROWTH_ASSETS: AssetClass[] = [
+	"australian_equities",
+	"international_equities",
+	"property",
+	"infrastructure",
+	"private_equity",
+	"alternatives",
+];
+
+export const DEFENSIVE_ASSETS: AssetClass[] = ["fixed_income", "cash"];
+
 export interface BtcPriceMonthly {
 	price_date: string;
 	btc_aud_close: number;
