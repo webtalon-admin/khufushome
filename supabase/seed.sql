@@ -103,6 +103,29 @@ insert into public.accounts (id, user_id, name, type, institution, is_active, me
   '{"fund_name": "Future Super", "fund_id": "future_super", "investment_option": "Balanced Growth", "member_number": "000000"}'
 );
 
+-- Archived account for demo switch timeline (Hostplus)
+insert into public.accounts (id, user_id, name, type, institution, is_active, metadata) values (
+  '00000000-0000-0000-0000-000000000002',
+  'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+  'Hostplus – Balanced',
+  'super',
+  'Hostplus',
+  false,
+  '{"fund_name": "Hostplus", "fund_id": "hostplus_balanced", "investment_option": "Balanced"}'
+) on conflict (id) do nothing;
+
+-- Sample fund switch: Hostplus → Future Super in Oct 2020
+insert into public.super_fund_switches
+  (user_id, from_account_id, to_account_id, switch_date, reason, balance_at_switch)
+values (
+  'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+  '00000000-0000-0000-0000-000000000002',
+  '00000000-0000-0000-0000-000000000001',
+  '2020-10-15',
+  'Switching to ethical fund',
+  48000
+);
+
 -- Quarterly balance snapshots from research data (Oct 2020 – Mar 2025).
 -- Annual balances from config/personal.yaml, interpolated to quarter ends.
 -- Transactions estimated from salary, SG rates, and Future Super fee schedule.

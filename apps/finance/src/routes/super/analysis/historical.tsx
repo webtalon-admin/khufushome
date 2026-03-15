@@ -1,7 +1,7 @@
-import { Button, Card, CardContent, Input } from "@khufushome/ui";
+import { Badge, Button, Card, CardContent, Input } from "@khufushome/ui";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { SuperNav } from "../../../components/super/SuperNav";
 import { useMemo, useState } from "react";
 import {
@@ -9,6 +9,7 @@ import {
 	Legend,
 	Line,
 	LineChart,
+	ReferenceLine,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
@@ -19,7 +20,9 @@ import {
 	fetchFundFees,
 	fetchFundReferences,
 	fetchFundReturns,
+	fetchFundSwitches,
 	fetchSnapshots,
+	fetchSuperAccounts,
 } from "../../../lib/super-api";
 import { personalWhatIf, smsfBtcWhatIf } from "../../../lib/super-analysis";
 import type { FundReference } from "../../../lib/super-types";
@@ -63,6 +66,24 @@ function fundDisplayName(
 	return ref ? `${ref.name} — ${ref.option_name}` : fundId;
 }
 
+function findClosestDate(target: string, dates: Set<string>): string | null {
+	if (dates.has(target)) return target;
+	const arr = Array.from(dates).sort();
+	let best: string | null = null;
+	let bestDiff = Infinity;
+	const targetMs = new Date(target).getTime();
+	for (const d of arr) {
+		const diff = Math.abs(new Date(d).getTime() - targetMs);
+		if (diff < bestDiff) {
+			bestDiff = diff;
+			best = d;
+		}
+	}
+	return best;
+}
+
+const SWITCH_COLOURS = ["#e11d48", "#7c3aed", "#0891b2", "#c2410c"];
+
 function SuperHistoricalPage() {
 	const [selectedFunds, setSelectedFunds] = useState<Set<string>>(
 		new Set(["australian_super", "hostplus_balanced", "vanguard_super"]),
@@ -99,6 +120,16 @@ function SuperHistoricalPage() {
 	const { data: btcPrices = [] } = useQuery({
 		queryKey: ["btc-prices"],
 		queryFn: fetchBtcPrices,
+	});
+
+	const { data: fundSwitches = [] } = useQuery({
+		queryKey: ["fund-switches"],
+		queryFn: fetchFundSwitches,
+	});
+
+	const { data: superAccounts = [] } = useQuery({
+		queryKey: ["super-accounts"],
+		queryFn: fetchSuperAccounts,
 	});
 
 	const activeFundIds = useMemo(
@@ -138,6 +169,34 @@ function SuperHistoricalPage() {
 				: {}),
 		}));
 	}, [whatIfData, btcResult, showSmsfBtc]);
+
+	const chartDates = useMemo(
+		() => new Set(chartData.map((p) => p.date)),
+		[chartData],
+	);
+
+	const switchMarkers = useMemo(() => {
+		if (fundSwitches.length === 0 || chartDates.size === 0) return [];
+
+		const accountMap = new Map(superAccounts.map((a) => [a.id, a]));
+
+		return fundSwitches
+			.sort((a, b) => a.switch_date.localeCompare(b.switch_date))
+			.map((sw, idx) => {
+				const fromAcct = sw.from_account_id ? accountMap.get(sw.from_account_id) : null;
+				const toAcct = accountMap.get(sw.to_account_id);
+				const fromName = fromAcct?.metadata?.fund_name ?? "Unknown";
+				const toName = toAcct?.metadata?.fund_name ?? "Unknown";
+				const closest = findClosestDate(sw.switch_date, chartDates);
+				return {
+					...sw,
+					fromName,
+					toName,
+					chartDate: closest,
+					colour: SWITCH_COLOURS[idx % SWITCH_COLOURS.length]!,
+				};
+			});
+	}, [fundSwitches, superAccounts, chartDates]);
 
 	const allLineKeys = useMemo(() => {
 		const keys = ["actual", ...activeFundIds];
@@ -254,24 +313,94 @@ function SuperHistoricalPage() {
 											fundDisplayName(value, fundRefs)
 										}
 									/>
-									{allLineKeys.map((key) => (
-										<Line
-											key={key}
-											type="monotone"
-											dataKey={key}
-											stroke={FUND_COLOURS[key] ?? "#94a3b8"}
-											strokeWidth={key === "actual" ? 3 : 1.5}
-											strokeDasharray={
-												key === "smsf_btc" ? "6 3" : undefined
-											}
-											dot={key === "actual"}
-											connectNulls
+								{allLineKeys.map((key) => (
+									<Line
+										key={key}
+										type="monotone"
+										dataKey={key}
+										stroke={FUND_COLOURS[key] ?? "#94a3b8"}
+										strokeWidth={key === "actual" ? 3 : 1.5}
+										strokeDasharray={
+											key === "smsf_btc" ? "6 3" : undefined
+										}
+										dot={key === "actual"}
+										connectNulls
+									/>
+								))}
+								{switchMarkers.map((sw) =>
+									sw.chartDate ? (
+										<ReferenceLine
+											key={sw.id}
+											x={sw.chartDate}
+											stroke={sw.colour}
+											strokeWidth={2}
+											strokeDasharray="4 4"
+											label={{
+												value: `⇄ ${sw.toName}`,
+												position: "insideTopRight",
+												fill: sw.colour,
+												fontSize: 11,
+												fontWeight: 600,
+											}}
 										/>
-									))}
-								</LineChart>
+									) : null,
+								)}
+							</LineChart>
 							</ResponsiveContainer>
 						</CardContent>
 					</Card>
+
+					{/* Fund Switch Timeline */}
+					{switchMarkers.length > 0 && (
+						<Card>
+							<CardContent className="p-5">
+								<h3 className="text-sm font-semibold text-foreground mb-3">
+									Fund Switch Timeline
+								</h3>
+								<div className="relative">
+									<div className="absolute left-3 top-0 bottom-0 w-px bg-border" />
+									<div className="space-y-4">
+										{switchMarkers.map((sw) => (
+											<div key={sw.id} className="relative pl-8">
+												<div
+													className="absolute left-1.5 top-1 size-3 rounded-full border-2 bg-background"
+													style={{ borderColor: sw.colour }}
+												/>
+												<div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+													<Badge
+														variant="outline"
+														className="w-fit text-xs"
+														style={{ borderColor: sw.colour, color: sw.colour }}
+													>
+														{new Date(`${sw.switch_date}T00:00:00`).toLocaleDateString("en-AU", {
+															day: "numeric",
+															month: "short",
+															year: "numeric",
+														})}
+													</Badge>
+													<div className="flex items-center gap-1.5 text-sm">
+														<span className="font-medium text-foreground">{sw.fromName}</span>
+														<ArrowRight className="size-3.5 text-muted-foreground" />
+														<span className="font-medium text-foreground">{sw.toName}</span>
+													</div>
+													{sw.balance_at_switch != null && (
+														<span className="text-xs text-muted-foreground">
+															({fmtCurrency(sw.balance_at_switch)})
+														</span>
+													)}
+												</div>
+												{sw.reason && (
+													<p className="mt-0.5 text-xs text-muted-foreground">
+														{sw.reason}
+													</p>
+												)}
+											</div>
+										))}
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Fund Selector */}
 					<div className="grid gap-4 lg:grid-cols-2">
