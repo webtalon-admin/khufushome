@@ -20,7 +20,7 @@
     "db:status": "supabase status",
     "pipeline:seed": "uv run --project scripts/super-pipeline python scripts/super-pipeline/seed.py",
     "pipeline:apra": "uv run --project scripts/super-pipeline python scripts/super-pipeline/ingest_apra.py",
-    "pipeline:yoursuper": "curl -s -X POST http://127.0.0.1:54321/functions/v1/yoursuper-refresh -H 'Authorization: Bearer '${SUPABASE_ANON_KEY:-sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH} -H 'Content-Type: application/json'",
+    "pipeline:yoursuper": "curl -s -X POST http://127.0.0.1:54321/functions/v1/yoursuper-refresh -H \"Authorization: Bearer ${SUPABASE_ANON_KEY:-sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH}\" -H \"Content-Type: application/json\"",
     "functions:serve": "supabase functions serve"
   },
   "devDependencies": {
