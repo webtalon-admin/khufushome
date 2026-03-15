@@ -51,7 +51,7 @@ export function AuBenchmarkCard({
 	currentBalance,
 }: AuBenchmarkCardProps) {
 	const [gender, setGender] = useState<Gender>("male");
-	const [viewMode, setViewMode] = useState<ViewMode>("your-age");
+	const [viewMode, setViewMode] = useState<ViewMode>("all-ages");
 	const [userAge, setUserAge] = useState<number | null>(() => {
 		const stored = localStorage.getItem(AGE_STORAGE_KEY);
 		return stored ? Number(stored) : null;
