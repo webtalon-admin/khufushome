@@ -4,9 +4,10 @@ const ATO_API_URL = "https://www.ato.gov.au/api/v1/YourSuper/APRAData";
 
 interface ATOSubProduct {
 	lifeCycleStageName?: string;
-	fundNetReturnLastSevenYearsPercentageNumber?: number;
-	fundNetReturnLastFiveYearsPercentageNumber?: number;
-	fundNetReturnLastThreeYearsPercentageNumber?: number;
+	fundNetReturnLastTenYearsPercentageNumber?: number | null;
+	fundNetReturnLastNineYearsPercentageNumber?: number | null;
+	fundNetReturnLastFiveYearsPercentageNumber?: number | null;
+	fundNetReturnLastThreeYearsPercentageNumber?: number | null;
 	privateFundIndicator?: string;
 	adminFeesDisclosedAmount?: number;
 	investmentFeesDisclosedAmount?: number;
@@ -22,6 +23,14 @@ interface ATOProduct {
 	superannuationProviderDetailFundName: string;
 	superannuationProviderProductName: string;
 	subProduct: ATOSubProduct[];
+}
+
+interface ATOApiResponse {
+	processMessages: unknown[];
+	response: {
+		apraDataFileUploadDate: string;
+		fundProduct: ATOProduct[];
+	};
 }
 
 // Our tracked fund ABNs and name patterns, matching config.py.
@@ -137,10 +146,13 @@ Deno.serve(async (req) => {
 			);
 		}
 
-		const products: ATOProduct[] = await response.json();
-		console.log(`Fetched ${products.length} products from ATO YourSuper API`);
+		const body: ATOApiResponse = await response.json();
+		const products = body.response.fundProduct;
+		console.log(
+			`Fetched ${products.length} products from ATO YourSuper API (data date: ${body.response.apraDataFileUploadDate})`,
+		);
 
-		const today = new Date().toISOString().split("T")[0];
+		const dataDate = body.response.apraDataFileUploadDate;
 		const rows: Record<string, unknown>[] = [];
 		const matched = new Set<string>();
 
@@ -153,7 +165,8 @@ Deno.serve(async (req) => {
 
 			const sub = product.subProduct?.[0];
 			const netReturn =
-				sub?.fundNetReturnLastSevenYearsPercentageNumber ??
+				sub?.fundNetReturnLastTenYearsPercentageNumber ??
+				sub?.fundNetReturnLastNineYearsPercentageNumber ??
 				sub?.fundNetReturnLastFiveYearsPercentageNumber ??
 				sub?.fundNetReturnLastThreeYearsPercentageNumber ??
 				null;
@@ -164,7 +177,7 @@ Deno.serve(async (req) => {
 				net_return_pa: netReturn,
 				fees_pa_on_50k: sub?.totalFeesDisclosedAmount ?? null,
 				ranking: null,
-				data_date: today,
+				data_date: dataDate,
 			});
 			matched.add(fundId);
 		}
@@ -188,7 +201,7 @@ Deno.serve(async (req) => {
 			pipeline: "yoursuper_refresh",
 			status: "success",
 			rows_upserted: rows.length,
-			source_date: today,
+			source_date: dataDate,
 			started_at: startedAt,
 			completed_at: new Date().toISOString(),
 		});
@@ -198,6 +211,7 @@ Deno.serve(async (req) => {
 				ok: true,
 				matched: rows.length,
 				total_products: products.length,
+				data_date: dataDate,
 				funds: rows.map((r) => ({
 					fund_id: r.fund_id,
 					assessment: r.assessment,
