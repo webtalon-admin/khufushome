@@ -16,7 +16,7 @@ from pathlib import Path
 
 from supabase import create_client
 
-from config import TRACKED_FUNDS
+from config import FUND_ID_MAP, TRACKED_FUNDS
 
 RESEARCH_DIR = Path(__file__).resolve().parent.parent.parent / "research" / "super-research"
 DATA_DIR = RESEARCH_DIR / "data"
@@ -60,17 +60,24 @@ def seed_fund_returns(sb):
         return
 
     rows = []
+    skipped = set()
     with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            fid = row["fund_id"]
+            if fid not in FUND_ID_MAP:
+                skipped.add(fid)
+                continue
             rows.append({
-                "fund_id": row["fund_id"],
+                "fund_id": fid,
                 "fy": row["fy"],
                 "return_pct": float(row["return_pct"]),
                 "return_type": row["return_type"],
                 "source": row.get("source", ""),
             })
 
+    if skipped:
+        print(f"  Skipped {len(skipped)} untracked fund_ids: {skipped}")
     if rows:
         sb.table("super_fund_returns").upsert(rows, on_conflict="fund_id,fy").execute()
     print(f"  Seeded {len(rows)} fund return rows.")
@@ -89,15 +96,22 @@ def seed_fund_allocations(sb):
     ]
 
     rows = []
+    skipped = set()
     with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            data = {"fund_id": row["fund_id"], "source": row.get("source", "")}
+            fid = row["fund_id"]
+            if fid not in FUND_ID_MAP:
+                skipped.add(fid)
+                continue
+            data = {"fund_id": fid, "source": row.get("source", "")}
             for field in numeric_fields:
                 val = row.get(field, "").strip()
                 data[field] = float(val) if val else None
             rows.append(data)
 
+    if skipped:
+        print(f"  Skipped {len(skipped)} untracked fund_ids: {skipped}")
     if rows:
         sb.table("super_fund_allocations").upsert(rows, on_conflict="fund_id").execute()
     print(f"  Seeded {len(rows)} fund allocation rows.")
@@ -110,17 +124,21 @@ def seed_fund_fees(sb):
         print("  Skipping fund fees — CSV not found.")
         return
 
+    def to_float(val):
+        v = val.strip() if val else ""
+        return float(v) if v else None
+
     rows = []
+    skipped = set()
     with open(csv_path, newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-
-            def to_float(val):
-                v = val.strip() if val else ""
-                return float(v) if v else None
-
+            fid = row["fund_id"]
+            if fid not in FUND_ID_MAP:
+                skipped.add(fid)
+                continue
             rows.append({
-                "fund_id": row["fund_id"],
+                "fund_id": fid,
                 "admin_fee_flat": to_float(row.get("admin_fee_flat", "")),
                 "admin_fee_pct": to_float(row.get("admin_fee_pct", "")),
                 "investment_fee_pct": to_float(row.get("investment_fee_pct", "")),
@@ -131,6 +149,8 @@ def seed_fund_fees(sb):
                 "source": row.get("source", ""),
             })
 
+    if skipped:
+        print(f"  Skipped {len(skipped)} untracked fund_ids: {skipped}")
     if rows:
         sb.table("super_fund_fees").upsert(rows, on_conflict="fund_id").execute()
     print(f"  Seeded {len(rows)} fund fee rows.")
