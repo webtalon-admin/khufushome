@@ -431,6 +431,11 @@ def ingest_historical_saa(sb, csv_path: str | None = None) -> int:
         if total < 1:
             continue
 
+        # Normalise to 100% — APRA data may report as dollar amounts or basis points
+        if total > 110:
+            for f in alloc_fields:
+                alloc_data[f] = (alloc_data[f] / total) * 100
+
         row_out = {"fund_id": fund_id, "source": "APRA QSPS Historical SAA"}
         for f in alloc_fields:
             row_out[f] = round(alloc_data[f], 2) if alloc_data[f] > 0 else None

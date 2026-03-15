@@ -166,10 +166,23 @@ function FeeImpactPage() {
 									<XAxis
 										dataKey="balance"
 										className="text-xs"
+										label={{
+											value: "Balance",
+											position: "insideBottomRight",
+											offset: -5,
+											className: "text-xs fill-muted-foreground",
+										}}
 									/>
 									<YAxis
 										className="text-xs"
 										tickFormatter={(v: number) => `$${v.toLocaleString()}`}
+										label={{
+											value: "Annual Fee ($)",
+											position: "insideTopLeft",
+											offset: 0,
+											dy: -15,
+											className: "text-xs fill-muted-foreground font-medium",
+										}}
 									/>
 									<Tooltip
 										content={({ payload, label }) => {
@@ -354,6 +367,13 @@ function FeeImpactPage() {
 													? `$${(v / 1000).toFixed(0)}k`
 													: `$${v}`
 										}
+										label={{
+											value: "Cumulative Fees ($)",
+											position: "insideTopLeft",
+											offset: 0,
+											dy: -15,
+											className: "text-xs fill-muted-foreground font-medium",
+										}}
 									/>
 									<Tooltip
 										content={({ payload, label }) => {

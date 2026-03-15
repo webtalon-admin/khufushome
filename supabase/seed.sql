@@ -330,9 +330,9 @@ insert into public.super_fund_allocations
   (fund_id, australian_equities, international_equities, property, infrastructure, private_equity, alternatives, fixed_income, cash, source)
 values
   ('australian_super', 23.85, 30.65, 8.00, 9.25, 4.75, 0.00, 14.50, 5.00, 'PDS 1 Aug 2025'),
-  ('hostplus_balanced', 23.20, 32.20, null, null, null, 31.86, 2.88, 3.10, 'Hostplus Investment Manager Allocations'),
-  ('hostplus_shares_plus', 31.92, 39.84, null, null, null, 23.67, 0.00, 0.00, 'InvestSMART/Morningstar'),
-  ('unisuper', 32.50, 39.30, null, null, null, null, 10.90, 12.00, 'InvestSMART/Morningstar'),
+  ('hostplus_balanced', 23.20, 32.20, 3.50, 6.00, 3.50, 18.86, 2.88, 9.86, 'Hostplus PDS Jul 2025 (alternatives split)'),
+  ('hostplus_shares_plus', 31.92, 39.84, 1.50, 2.50, 1.50, 18.17, 0.00, 4.57, 'Morningstar (alternatives split)'),
+  ('unisuper', 32.50, 39.30, 3.00, 2.00, 0.00, 1.30, 10.90, 11.00, 'InvestSMART/Morningstar (alternatives split)'),
   ('art_high_growth', 32.25, 33.25, null, null, null, 31.50, 1.00, 2.00, 'australianretirementtrust.com.au'),
   ('aware_super', 28.50, 38.50, 7.00, 11.50, 7.00, 0.50, 3.00, 4.00, 'aware.com.au Sep 2025'),
   ('hesta_high_growth', 32.00, 31.50, 7.00, 10.00, 8.00, 2.00, 4.50, 5.00, 'HESTA PDS Sep 2025'),

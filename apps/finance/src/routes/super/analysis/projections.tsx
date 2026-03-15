@@ -2,7 +2,7 @@ import { Button, Card, CardContent, Input } from "@khufushome/ui";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	Area,
 	AreaChart,
@@ -18,8 +18,12 @@ import {
 	fetchFundFees,
 	fetchFundReferences,
 	fetchSnapshots,
+	fetchSuperAccounts,
 } from "../../../lib/super-api";
-import { multiProjection } from "../../../lib/super-analysis";
+import {
+	multiProjection,
+	totalFeePct as calcTotalFeePct,
+} from "../../../lib/super-analysis";
 import type { ProjectionInput } from "../../../lib/super-types";
 
 export const Route = createFileRoute("/super/analysis/projections")({
@@ -56,7 +60,7 @@ function fmtCurrency(n: number): string {
 	}).format(n);
 }
 
-function totalFeePct(
+function lookupFees(
 	feeLookup: Map<string, { feePct: number; feeFlat: number }>,
 	fundId: string,
 ): { feePct: number; feeFlat: number } {
@@ -85,16 +89,25 @@ function SuperProjectionsPage() {
 		queryFn: fetchFundFees,
 	});
 
+	const { data: accounts = [] } = useQuery({
+		queryKey: ["super-accounts"],
+		queryFn: fetchSuperAccounts,
+	});
+
 	const feeLookup = useMemo(() => {
 		const m = new Map<string, { feePct: number; feeFlat: number }>();
 		for (const f of fundFees) {
-			let pct = f.admin_fee_pct + f.investment_fee_pct;
-			if (f.performance_fee_pct) pct += f.performance_fee_pct;
-			if (f.transaction_cost_pct) pct += f.transaction_cost_pct;
-			m.set(f.fund_id, { feePct: pct, feeFlat: f.admin_fee_flat });
+			m.set(f.fund_id, { feePct: calcTotalFeePct(f), feeFlat: f.admin_fee_flat });
 		}
 		return m;
 	}, [fundFees]);
+
+	const activeAccount = accounts.find((a) => a.is_active);
+	const activeFundFee = useMemo((): { feePct: number; feeFlat: number } => {
+		const fundId = activeAccount?.metadata?.fund_id;
+		if (fundId && feeLookup.has(fundId)) return feeLookup.get(fundId)!;
+		return { feePct: 0.5, feeFlat: 0 };
+	}, [activeAccount, feeLookup]);
 
 	const latestBalance = useMemo(() => {
 		if (snapshots.length === 0) return 0;
@@ -117,35 +130,44 @@ function SuperProjectionsPage() {
 	const [showInputs, setShowInputs] = useState(false);
 
 	// ── Fund projections with per-fund return % ──────
-	const [funds, setFunds] = useState<FundProjection[]>(() => [
-		{
-			id: genId(),
-			fundId: "optimistic",
-			label: "Optimistic (10%)",
-			returnPct: 10,
-			feePct: 0.5,
-			feeFlat: 0,
-			colour: SCENARIO_COLOURS[0]!,
-		},
-		{
-			id: genId(),
-			fundId: "expected",
-			label: "Expected (8%)",
-			returnPct: 8,
-			feePct: 0.5,
-			feeFlat: 0,
-			colour: SCENARIO_COLOURS[1]!,
-		},
-		{
-			id: genId(),
-			fundId: "conservative",
-			label: "Conservative (5.5%)",
-			returnPct: 5.5,
-			feePct: 0.5,
-			feeFlat: 0,
-			colour: SCENARIO_COLOURS[2]!,
-		},
-	]);
+	const [funds, setFunds] = useState<FundProjection[]>([]);
+	const scenariosInit = useRef(false);
+
+	useEffect(() => {
+		if (scenariosInit.current) return;
+		scenariosInit.current = true;
+
+		const fee = activeFundFee;
+		setFunds([
+			{
+				id: genId(),
+				fundId: "optimistic",
+				label: "Optimistic (10%)",
+				returnPct: 10,
+				feePct: fee.feePct,
+				feeFlat: fee.feeFlat,
+				colour: SCENARIO_COLOURS[0]!,
+			},
+			{
+				id: genId(),
+				fundId: "expected",
+				label: "Expected (8%)",
+				returnPct: 8,
+				feePct: fee.feePct,
+				feeFlat: fee.feeFlat,
+				colour: SCENARIO_COLOURS[1]!,
+			},
+			{
+				id: genId(),
+				fundId: "conservative",
+				label: "Conservative (5.5%)",
+				returnPct: 5.5,
+				feePct: fee.feePct,
+				feeFlat: fee.feeFlat,
+				colour: SCENARIO_COLOURS[2]!,
+			},
+		]);
+	}, [activeFundFee]);
 
 	const handleAgeChange = (v: number) => {
 		setCurrentAge(v);
@@ -154,7 +176,7 @@ function SuperProjectionsPage() {
 
 	const addFundProjection = (refId?: string) => {
 		const ref = refId ? fundRefs.find((r) => r.id === refId) : null;
-		const fees = ref ? totalFeePct(feeLookup, ref.id) : { feePct: 0.5, feeFlat: 0 };
+		const fees = ref ? lookupFees(feeLookup, ref.id) : { feePct: 0.5, feeFlat: 0 };
 		const idx = funds.length;
 		setFunds((prev) => [
 			...prev,
@@ -317,6 +339,13 @@ function SuperProjectionsPage() {
 											? `$${(v / 1_000_000).toFixed(1)}M`
 											: `$${(v / 1000).toFixed(0)}k`
 									}
+									label={{
+										value: "Balance ($)",
+										position: "insideTopLeft",
+										offset: 0,
+										dy: -15,
+										className: "text-xs fill-muted-foreground font-medium",
+									}}
 								/>
 								<Tooltip
 									content={({ payload, label }) => {
@@ -469,6 +498,22 @@ function SuperProjectionsPage() {
 										}
 									/>
 								</div>
+								<div className="flex items-center gap-1.5">
+									<label className="text-xs text-muted-foreground whitespace-nowrap">
+										Fee $/yr
+									</label>
+									<Input
+										type="number"
+										step="10"
+										min="0"
+										max="500"
+										className="h-7 w-20 text-sm tabular-nums text-right"
+										value={f.feeFlat}
+										onChange={(e) =>
+											updateFund(f.id, "feeFlat", Number(e.target.value))
+										}
+									/>
+								</div>
 								{funds.length > 1 && (
 									<Button
 										variant="ghost"
@@ -608,7 +653,13 @@ function SuperProjectionsPage() {
 											Fee %
 										</th>
 										<th className="px-5 py-2.5 font-medium text-right">
+											Fee $/yr
+										</th>
+										<th className="px-5 py-2.5 font-medium text-right">
 											Balance at {retirementAge}
+										</th>
+										<th className="px-5 py-2.5 font-medium text-right">
+											Total Fees Paid
 										</th>
 										<th className="px-5 py-2.5 font-medium text-right">
 											vs Best
@@ -619,14 +670,26 @@ function SuperProjectionsPage() {
 									{(() => {
 										const lastRow = chartData[chartData.length - 1];
 										if (!lastRow) return null;
-										const balances = funds.map((f) => ({
-											fund: f,
-											balance: (lastRow[f.fundId] as number) ?? 0,
-										}));
+										const balances = funds.map((f) => {
+											const finalBalance = (lastRow[f.fundId] as number) ?? 0;
+											// Estimate total fees paid over the projection horizon
+											let bal = latestBalance;
+											let totalFees = 0;
+											const annualContrib = salary * (sgRate / 100) + voluntary;
+											let contrib = annualContrib;
+											for (let y = 1; y <= yearsToRetire; y++) {
+												const fee = (bal * f.feePct) / 100 + f.feeFlat;
+												totalFees += fee;
+												const gross = bal * (f.returnPct / 100);
+												bal = bal + gross - fee + contrib;
+												contrib *= 1 + salaryGrowth / 100;
+											}
+											return { fund: f, balance: finalBalance, totalFees };
+										});
 										const best = Math.max(
 											...balances.map((b) => b.balance),
 										);
-										return balances.map(({ fund, balance }) => {
+										return balances.map(({ fund, balance, totalFees }) => {
 											const diff = balance - best;
 											return (
 												<tr
@@ -652,8 +715,14 @@ function SuperProjectionsPage() {
 													<td className="px-5 py-2.5 text-right tabular-nums text-muted-foreground">
 														{fund.feePct.toFixed(2)}%
 													</td>
+													<td className="px-5 py-2.5 text-right tabular-nums text-muted-foreground">
+														{fmtCurrency(fund.feeFlat)}
+													</td>
 													<td className="px-5 py-2.5 text-right font-bold tabular-nums">
 														{fmtCurrency(balance)}
+													</td>
+													<td className="px-5 py-2.5 text-right tabular-nums text-red-600 dark:text-red-400">
+														{fmtCurrency(totalFees)}
 													</td>
 													<td
 														className={`px-5 py-2.5 text-right tabular-nums font-medium ${
