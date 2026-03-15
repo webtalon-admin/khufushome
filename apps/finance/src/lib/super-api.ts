@@ -7,6 +7,7 @@ import type {
 	FundFee,
 	FundReference,
 	FundReturn,
+	PipelineLog,
 } from "./super-types";
 
 function supabase() {
@@ -116,4 +117,46 @@ export async function fetchBtcPrices(): Promise<BtcPriceMonthly[]> {
 
 	if (error) throw error;
 	return data as BtcPriceMonthly[];
+}
+
+// ── Pipeline Logs ──────────────────────────────────────────
+
+export async function fetchLatestPipelineLogs(): Promise<
+	Record<string, PipelineLog>
+> {
+	const { data, error } = await supabase()
+		.from("data_pipeline_logs")
+		.select("*")
+		.in("pipeline", [
+			"yoursuper_refresh",
+			"btc_price_refresh",
+			"apra_ingest",
+		])
+		.order("started_at", { ascending: false });
+
+	if (error) throw error;
+
+	const latest: Record<string, PipelineLog> = {};
+	for (const row of data as PipelineLog[]) {
+		if (!latest[row.pipeline]) {
+			latest[row.pipeline] = row;
+		}
+	}
+	return latest;
+}
+
+// ── Edge Function Invocation ───────────────────────────────
+
+export async function invokeEdgeFunction(
+	functionName: string,
+): Promise<{ ok: boolean; error?: string }> {
+	const { data, error } = await supabase().functions.invoke(functionName, {
+		method: "POST",
+	});
+
+	if (error) {
+		return { ok: false, error: error.message };
+	}
+
+	return (data as { ok: boolean; error?: string }) ?? { ok: true };
 }
