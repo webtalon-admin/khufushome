@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CalendarDays, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { SnapshotFormDialog } from "../../../components/super/SnapshotFormDialog";
+import { SuperNav } from "../../../components/super/SuperNav";
 import {
 	createSnapshot,
 	deleteSnapshot,
@@ -137,6 +138,7 @@ function SuperAnalysisOverviewPage() {
 
 	return (
 		<div className="space-y-6">
+			<SuperNav />
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="font-display text-2xl font-bold text-foreground">
