@@ -161,5 +161,20 @@ values
   ('00000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
    103145.00, '2024-12-31', 3737.50, null, 105.15, 560.63, null, 2885.27),
   ('00000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
-   108972.00, '2025-03-31', 3737.50, null, 109.69, 560.63, null, 2759.81)
+   108972.00, '2025-03-31', 3737.50, null, 109.69, 560.63, null, 2759.81),
+
+  -- Q2 FY2024-25 (Apr–Jun 2025) — ACTUAL transactions from super account
+  -- Note: April transactions missing from raw data; only May 31 + June included.
+  -- Balance interpolated from Mar 2025 ($108,972) and Sep 2025 ($120,820).
+  ('00000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+   114863.63, '2025-06-30', 1495.52, null, 46.89, 217.29, null, 4660.29),
+
+  -- Q3 FY2025-26 (Jul–Sep 2025) — ACTUAL transactions, balance from personal.yaml
+  ('00000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+   120820.00, '2025-09-30', 4823.85, null, 121.76, 705.30, null, 1959.58),
+
+  -- Q4 FY2025-26 (Oct–Dec 2025) — ACTUAL transactions, balance interpolated
+  -- from Sep 2025 ($120,820) and Mar 2026 ($119,000).
+  ('00000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
+   119805.21, '2025-12-31', 4823.85, null, 126.78, 704.54, null, -5007.32)
 ;
