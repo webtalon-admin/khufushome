@@ -79,7 +79,7 @@ function FundPapersPage() {
 							</button>
 						</div>
 
-						<article className="prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-h1:text-xl prose-h2:text-lg prose-h3:text-base prose-table:text-xs prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-1.5 prose-blockquote:text-muted-foreground prose-blockquote:border-primary/30 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-hr:border-border">
+						<article className="fund-paper prose prose-sm dark:prose-invert max-w-none prose-headings:font-display prose-h1:text-2xl prose-h2:text-lg prose-h3:text-base prose-table:text-xs prose-th:bg-muted/50 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-td:px-3 prose-td:py-1.5 prose-td:border-t prose-td:border-border prose-blockquote:text-muted-foreground prose-blockquote:border-primary/40 prose-blockquote:bg-muted/30 prose-blockquote:rounded-r-md prose-blockquote:py-2 prose-blockquote:px-4 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-hr:border-border prose-strong:text-foreground prose-li:marker:text-primary/60">
 							<Markdown remarkPlugins={[remarkGfm]}>
 								{paper.content}
 							</Markdown>
