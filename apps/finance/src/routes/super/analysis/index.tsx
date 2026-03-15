@@ -89,6 +89,14 @@ function SuperAnalysisOverviewPage() {
 		},
 	});
 
+	const sorted = [...snapshots].sort((a, b) =>
+		a.recorded_date.localeCompare(b.recorded_date),
+	);
+	const latest = sorted.length > 0 ? sorted[sorted.length - 1] : null;
+	const latestSnapshotDate = latest?.recorded_date ?? null;
+	const isLatestSnapshot = (s: BalanceSnapshot) =>
+		s.id === latest?.id;
+
 	const handleOpenCreate = () => {
 		setEditingSnapshot(null);
 		setDialogOpen(true);
@@ -101,9 +109,6 @@ function SuperAnalysisOverviewPage() {
 
 	const handleSubmit = (raw: BalanceSnapshotInsert | BalanceSnapshotUpdate) => {
 		const data = raw as BalanceSnapshotInsert;
-		const sorted = [...snapshots].sort(
-			(a, b) => a.recorded_date.localeCompare(b.recorded_date),
-		);
 
 		if (editingSnapshot) {
 			const idx = sorted.findIndex((s) => s.id === editingSnapshot.id);
@@ -129,8 +134,6 @@ function SuperAnalysisOverviewPage() {
 			deleteMut.mutate(s.id);
 		}
 	};
-
-	const latest = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
 
 	return (
 		<div className="space-y-6">
@@ -278,15 +281,17 @@ function SuperAnalysisOverviewPage() {
 													>
 														<Pencil className="size-3.5" />
 													</Button>
-													<Button
-														variant="ghost"
-														size="sm"
-														className="size-7 p-0 text-destructive hover:text-destructive"
-														onClick={() => handleDelete(s)}
-														title="Delete"
-													>
-														<Trash2 className="size-3.5" />
-													</Button>
+													{isLatestSnapshot(s) && (
+														<Button
+															variant="ghost"
+															size="sm"
+															className="size-7 p-0 text-destructive hover:text-destructive"
+															onClick={() => handleDelete(s)}
+															title="Delete"
+														>
+															<Trash2 className="size-3.5" />
+														</Button>
+													)}
 												</div>
 											</td>
 										</tr>
@@ -303,6 +308,7 @@ function SuperAnalysisOverviewPage() {
 				onOpenChange={setDialogOpen}
 				snapshot={editingSnapshot}
 				superAccountId={TEMP_SUPER_ACCOUNT_ID}
+				latestSnapshotDate={latestSnapshotDate}
 				onSubmit={handleSubmit}
 				isPending={createMut.isPending || updateMut.isPending}
 			/>
