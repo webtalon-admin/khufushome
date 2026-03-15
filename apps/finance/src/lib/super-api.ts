@@ -318,6 +318,8 @@ export async function fetchLatestPipelineLogs(): Promise<
 			"yoursuper_refresh",
 			"btc_price_refresh",
 			"apra_ingest",
+			"apra_saa",
+			"apra_performance",
 		])
 		.order("started_at", { ascending: false });
 

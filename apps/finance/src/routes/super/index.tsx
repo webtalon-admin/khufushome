@@ -15,6 +15,7 @@ import {
 	TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
+import { DataFreshness } from "../../components/super/DataFreshness";
 import { FundSwitchDialog } from "../../components/super/FundSwitchDialog";
 import { SuperAccountDialog } from "../../components/super/SuperAccountDialog";
 import {
@@ -289,6 +290,8 @@ function SuperLandingPage() {
 					</Link>
 				))}
 			</div>
+
+			<DataFreshness />
 
 			<SuperAccountDialog
 				open={accountDialogOpen}
