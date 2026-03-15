@@ -341,3 +341,20 @@ values
   ('future_super', 15.00, 40.50, 3.70, null, null, 10.80, 25.00, 5.00, 'Estimated from 85/15 growth/defensive split')
 on conflict (fund_id) do nothing
 ;
+
+-- Seed fund fee structures from research CSV data
+insert into public.super_fund_fees
+  (fund_id, admin_fee_flat, admin_fee_pct, investment_fee_pct, performance_fee_pct, transaction_cost_pct, total_on_50k, total_on_100k, source)
+values
+  ('future_super', 60, 0.360, 0.920, 0.000, 0.040, 700, 1340, 'futuresuper.com.au + SuperGuide'),
+  ('australian_super', 52, 0.100, 0.520, 0.100, 0.040, 387, 742, 'AustralianSuper PDS Aug 2025'),
+  ('hostplus_balanced', 78, 0.000, 0.610, 0.410, 0.080, 668, 1230, 'Hostplus PDS Jul 2025'),
+  ('hostplus_shares_plus', 78, 0.000, 0.790, 0.280, null, 535, 1070, 'Morningstar MER 1.07%'),
+  ('unisuper', 96, 0.000, 0.500, null, 0.160, 426, 756, 'SuperGuide + unisuper.com.au'),
+  ('art_high_growth', 62.40, 0.100, 0.640, null, 0.060, 487, 862, 'australianretirementtrust.com.au'),
+  ('aware_super', 52, 0.150, 0.570, null, 0.070, 452, 842, 'aware.com.au Jun 2025'),
+  ('hesta_high_growth', 52, 0.150, 0.670, null, 0.050, 487, 922, 'HESTA PDS Sep 2025'),
+  ('rest_super', 78, 0.100, 0.470, 0.050, 0.090, 408, 738, 'rest.com.au + MySuper Dashboard'),
+  ('vanguard_super', 0, 0.560, 0.000, 0.000, 0.000, 280, 560, 'Vanguard PDS Oct 2025')
+on conflict (fund_id) do nothing
+;
