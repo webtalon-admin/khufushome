@@ -172,6 +172,12 @@ def period_to_fy(dt: pd.Timestamp) -> str:
     return f"FY{dt.year}"
 
 
+def period_to_quarter_label(dt: pd.Timestamp) -> str:
+    """Calendar quarter label: 2024-Q3 for Sep 2024, 2024-Q4 for Dec 2024, etc."""
+    q = (dt.month - 1) // 3 + 1
+    return f"{dt.year}-Q{q}"
+
+
 def inspect_csv(csv_path: str, label: str):
     """Print CSV structure for debugging column mapping."""
     print(f"\n{'=' * 60}")
@@ -271,17 +277,33 @@ def ingest_historical_performance(sb, csv_path: str | None = None) -> int:
 
     print(f"  Prepared {len(rows_to_upsert)} annual FY return rows for upsert.")
 
-    if rows_to_upsert:
-        for i in range(0, len(rows_to_upsert), BATCH_SIZE):
-            batch = rows_to_upsert[i : i + BATCH_SIZE]
+    # Also store individual quarterly return rows for the what-if engine
+    df["_quarter"] = df["_period"].apply(period_to_quarter_label)
+    quarterly_rows = []
+    for _, row in df.iterrows():
+        qr_pct = float(row[ret_col]) * 100  # convert decimal to percentage
+        quarterly_rows.append({
+            "fund_id": row["_fund_id"],
+            "fy": row["_quarter"],
+            "return_pct": round(qr_pct, 4),
+            "return_type": "quarterly_net",
+            "source": "APRA QSPS (raw quarterly)",
+        })
+
+    print(f"  Prepared {len(quarterly_rows)} quarterly return rows for upsert.")
+
+    all_rows = rows_to_upsert + quarterly_rows
+    if all_rows:
+        for i in range(0, len(all_rows), BATCH_SIZE):
+            batch = all_rows[i : i + BATCH_SIZE]
             sb.table("super_fund_returns").upsert(batch, on_conflict="fund_id,fy").execute()
             print(f"  Upserted batch {i // BATCH_SIZE + 1} ({len(batch)} rows)")
 
     log_pipeline(
         sb, "apra_performance", "success",
-        rows=len(rows_to_upsert), source_date=date.today(), started_at=started_at,
+        rows=len(all_rows), source_date=date.today(), started_at=started_at,
     )
-    return len(rows_to_upsert)
+    return len(all_rows)
 
 
 # ─────────────────────────────────────────────────────────────
