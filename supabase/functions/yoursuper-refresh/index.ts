@@ -35,60 +35,53 @@ interface ATOApiResponse {
 
 // Our tracked fund ABNs and name patterns, matching config.py.
 // The ATO API doesn't return ABNs, so we match on fund + product name.
+// YourSuper API only lists MySuper products (mandatory default option per fund).
+// We match on fund name; product_patterns use "mysuper" since that's how they're named.
+// Funds without a MySuper product in the API (Future Super, Hostplus Shares Plus) are excluded.
 const FUND_MATCHERS: {
 	fund_id: string;
 	fund_patterns: string[];
 	product_patterns: string[];
 }[] = [
 	{
-		fund_id: "future_super",
-		fund_patterns: ["future super"],
-		product_patterns: ["sustainable growth", "balanced impact", "growth"],
-	},
-	{
 		fund_id: "australian_super",
 		fund_patterns: ["australiansuper"],
-		product_patterns: ["balanced"],
+		product_patterns: ["mysuper"],
 	},
 	{
 		fund_id: "hostplus_balanced",
 		fund_patterns: ["hostplus"],
-		product_patterns: ["balanced"],
-	},
-	{
-		fund_id: "hostplus_shares_plus",
-		fund_patterns: ["hostplus"],
-		product_patterns: ["shares plus"],
+		product_patterns: ["mysuper"],
 	},
 	{
 		fund_id: "unisuper",
 		fund_patterns: ["unisuper"],
-		product_patterns: ["growth"],
+		product_patterns: ["mysuper"],
 	},
 	{
 		fund_id: "art_high_growth",
-		fund_patterns: ["australian retirement trust", "sunsuper", "qsuper"],
-		product_patterns: ["high growth"],
+		fund_patterns: ["australian retirement trust"],
+		product_patterns: ["lifecycle"],
 	},
 	{
 		fund_id: "aware_super",
-		fund_patterns: ["aware super", "first state super"],
-		product_patterns: ["high growth"],
+		fund_patterns: ["aware super"],
+		product_patterns: ["mysuper"],
 	},
 	{
 		fund_id: "hesta_high_growth",
-		fund_patterns: ["hesta", "h.e.s.t."],
-		product_patterns: ["high growth"],
+		fund_patterns: ["hesta"],
+		product_patterns: ["mysuper"],
 	},
 	{
 		fund_id: "rest_super",
-		fund_patterns: ["rest"],
-		product_patterns: ["growth", "core strategy"],
+		fund_patterns: ["retail employees superannuation"],
+		product_patterns: ["mysuper"],
 	},
 	{
 		fund_id: "vanguard_super",
 		fund_patterns: ["vanguard"],
-		product_patterns: ["growth"],
+		product_patterns: ["mysuper"],
 	},
 ];
 
