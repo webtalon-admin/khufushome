@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
 	BarChart3,
+	BookOpen,
 	Calculator,
 	ChevronRight,
 	FileText,
@@ -28,6 +29,7 @@ const researchTabs: NavTab[] = [
 	{ to: "/super/research", label: "Returns", icon: FileText, matchExact: true },
 	{ to: "/super/research/allocations", label: "Allocations", icon: PieChart },
 	{ to: "/super/research/fees", label: "Fees", icon: Calculator },
+	{ to: "/super/research/papers", label: "Papers", icon: BookOpen },
 ];
 
 function resolveSection(pathname: string): {
