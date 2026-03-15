@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { AlertCircle, CalendarDays, DollarSign, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { AuBenchmarkCard } from "../../../components/super/AuBenchmarkCard";
 import { ContributionFormDialog } from "../../../components/super/ContributionFormDialog";
 import { SnapshotFormDialog } from "../../../components/super/SnapshotFormDialog";
 import { SuperNav } from "../../../components/super/SuperNav";
@@ -314,6 +315,8 @@ function SuperAnalysisOverviewPage() {
 					</Card>
 				</div>
 			)}
+
+			<AuBenchmarkCard currentBalance={latest?.balance ?? null} />
 
 			<Card>
 				<CardContent className="p-0">
