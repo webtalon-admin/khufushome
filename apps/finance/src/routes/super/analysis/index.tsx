@@ -113,14 +113,14 @@ function SuperAnalysisOverviewPage() {
 
 		if (editingSnapshot) {
 			const idx = sorted.findIndex((s) => s.id === editingSnapshot.id);
-			const prev = idx > 0 ? sorted[idx - 1].balance : null;
+			const prev = idx > 0 ? (sorted[idx - 1]?.balance ?? null) : null;
 			const investmentReturn = deriveInvestmentReturn(data, prev);
 			updateMut.mutate({
 				id: editingSnapshot.id,
 				data: { ...data, investment_return: investmentReturn },
 			});
 		} else {
-			const prev = sorted.length > 0 ? sorted[sorted.length - 1].balance : null;
+			const prev = sorted.length > 0 ? (sorted[sorted.length - 1]?.balance ?? null) : null;
 			const investmentReturn = deriveInvestmentReturn(data, prev);
 			createMut.mutate({ ...data, investment_return: investmentReturn });
 		}
