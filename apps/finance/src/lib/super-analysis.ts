@@ -201,19 +201,14 @@ export function smsfBtcWhatIf(
 	);
 
 	function btcPriceForDate(d: Date): number {
-		// Try exact date first (e.g. 15th of month for contributions)
 		const exact = dateKey(d);
 		if (priceMap.has(exact)) return priceMap.get(exact)!;
 
-		// Try the 15th of same month (contribution date)
+		// All seed data is on the 15th — try that for the same month
 		const mid = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-15`;
 		if (priceMap.has(mid)) return priceMap.get(mid)!;
 
-		// Fallback to 1st of month
-		const first = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
-		if (priceMap.has(first)) return priceMap.get(first)!;
-
-		// Last resort: closest price on or before this date
+		// Fallback: closest price on or before this date
 		let bestPrice = pricesSorted[0].btc_aud_close;
 		for (const p of pricesSorted) {
 			if (p.price_date <= exact) bestPrice = p.btc_aud_close;

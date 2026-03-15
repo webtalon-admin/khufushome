@@ -10,33 +10,30 @@ function dateKey(d: Date): string {
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function extractPricesForDates(
+function extractMidMonthPrices(
 	prices: [number, number][],
 ): { price_date: string; btc_aud_close: number }[] {
-	// Extract the closest price to the 1st and 15th of each month
-	const byDate = new Map<string, number>();
+	// For each month, find the price closest to the 15th (days 14-16)
+	const byMonth = new Map<string, { price_date: string; close: number }>();
 
 	for (const [ts, price] of prices) {
 		const d = new Date(ts);
 		const day = d.getDate();
-		const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+		if (day < 13 || day > 17) continue;
 
-		// Closest to 1st: use days 1-3
-		if (day >= 1 && day <= 3) {
-			const key = `${ym}-01`;
-			byDate.set(key, price);
-		}
-		// Closest to 15th: use days 14-16
-		if (day >= 14 && day <= 16) {
-			const key = `${ym}-15`;
-			byDate.set(key, price);
+		const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+		const dist = Math.abs(day - 15);
+		const existing = byMonth.get(ym);
+
+		if (!existing || dist < Math.abs(parseInt(existing.price_date.slice(-2)) - 15)) {
+			byMonth.set(ym, { price_date: `${ym}-15`, close: price });
 		}
 	}
 
-	return Array.from(byDate.entries())
-		.map(([price_date, price]) => ({
+	return Array.from(byMonth.values())
+		.map(({ price_date, close }) => ({
 			price_date,
-			btc_aud_close: Math.round(price * 100) / 100,
+			btc_aud_close: Math.round(close * 100) / 100,
 		}))
 		.sort((a, b) => a.price_date.localeCompare(b.price_date));
 }
@@ -71,9 +68,9 @@ Deno.serve(async (_req) => {
 		const data: MarketChartResponse = await response.json();
 		console.log(`Received ${data.prices.length} data points`);
 
-		const monthlyPrices = extractPricesForDates(data.prices);
+		const monthlyPrices = extractMidMonthPrices(data.prices);
 		console.log(
-			`Extracted ${monthlyPrices.length} prices (1st+15th) (${monthlyPrices[0]?.price_date} to ${monthlyPrices.at(-1)?.price_date})`,
+			`Extracted ${monthlyPrices.length} mid-month prices (${monthlyPrices[0]?.price_date} to ${monthlyPrices.at(-1)?.price_date})`,
 		);
 
 		if (monthlyPrices.length > 0) {
