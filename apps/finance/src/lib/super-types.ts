@@ -121,6 +121,57 @@ export interface FundSwitchInsert {
 	balance_at_switch?: number;
 }
 
+// ── Contributions ─────────────────────────────────────────
+
+export const CONTRIBUTION_TYPES = [
+	"employer_sg",
+	"salary_sacrifice",
+	"personal_concessional",
+	"personal_non_concessional",
+	"government_co_contribution",
+] as const;
+
+export type ContributionType = (typeof CONTRIBUTION_TYPES)[number];
+
+export const CONTRIBUTION_TYPE_LABELS: Record<ContributionType, string> = {
+	employer_sg: "Employer SG",
+	salary_sacrifice: "Salary Sacrifice",
+	personal_concessional: "Personal (Concessional)",
+	personal_non_concessional: "Personal (Non-Concessional)",
+	government_co_contribution: "Government Co-Contribution",
+};
+
+export const CONCESSIONAL_TYPES: ContributionType[] = [
+	"employer_sg",
+	"salary_sacrifice",
+	"personal_concessional",
+];
+
+export interface Contribution {
+	id: string;
+	user_id: string;
+	super_account_id: string;
+	type: ContributionType;
+	amount: number;
+	date: string;
+	financial_year: string;
+	employer_name: string | null;
+	notes: string | null;
+	created_at: string;
+}
+
+export interface ContributionInsert {
+	super_account_id: string;
+	type: ContributionType;
+	amount: number;
+	date: string;
+	financial_year: string;
+	employer_name?: string;
+	notes?: string;
+}
+
+export type ContributionUpdate = Partial<Omit<ContributionInsert, "super_account_id">>;
+
 export interface PipelineLog {
 	id: string;
 	pipeline: string;

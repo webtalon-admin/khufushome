@@ -1,21 +1,33 @@
-import { Button, Card, CardContent } from "@khufushome/ui";
+import { Badge, Button, Card, CardContent } from "@khufushome/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, CalendarDays, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { AlertCircle, CalendarDays, DollarSign, Pencil, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ContributionFormDialog } from "../../../components/super/ContributionFormDialog";
 import { SnapshotFormDialog } from "../../../components/super/SnapshotFormDialog";
 import { SuperNav } from "../../../components/super/SuperNav";
 import {
+	createContribution,
 	createSnapshot,
+	deleteContribution,
 	deleteSnapshot,
+	fetchContributions,
 	fetchSnapshots,
 	fetchSuperAccounts,
+	updateContribution,
 	updateSnapshot,
 } from "../../../lib/super-api";
 import type {
 	BalanceSnapshot,
 	BalanceSnapshotInsert,
 	BalanceSnapshotUpdate,
+	Contribution,
+	ContributionInsert,
+	ContributionUpdate,
+} from "../../../lib/super-types";
+import {
+	CONCESSIONAL_TYPES,
+	CONTRIBUTION_TYPE_LABELS,
 } from "../../../lib/super-types";
 
 export const Route = createFileRoute("/super/analysis/")({
@@ -96,6 +108,64 @@ function SuperAnalysisOverviewPage() {
 		},
 	});
 
+	// ── Contributions ──────────────────────────────────────
+	const [contribDialogOpen, setContribDialogOpen] = useState(false);
+	const [editingContrib, setEditingContrib] = useState<Contribution | null>(null);
+
+	const { data: contributions = [] } = useQuery({
+		queryKey: ["super-contributions", activeAccountId],
+		queryFn: () => fetchContributions(activeAccountId ?? undefined),
+		enabled: !!activeAccountId,
+	});
+
+	const createContribMut = useMutation({
+		mutationFn: (data: ContributionInsert) => createContribution(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["super-contributions"] });
+			setContribDialogOpen(false);
+		},
+	});
+
+	const updateContribMut = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: ContributionUpdate }) =>
+			updateContribution(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["super-contributions"] });
+			setContribDialogOpen(false);
+			setEditingContrib(null);
+		},
+	});
+
+	const deleteContribMut = useMutation({
+		mutationFn: (id: string) => deleteContribution(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["super-contributions"] });
+		},
+	});
+
+	const currentFY = useMemo(() => {
+		const now = new Date();
+		const y = now.getFullYear();
+		const m = now.getMonth() + 1;
+		return m >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`;
+	}, []);
+
+	const fyContributions = useMemo(
+		() => contributions.filter((c) => c.financial_year === currentFY),
+		[contributions, currentFY],
+	);
+
+	const concessionalTotal = useMemo(
+		() =>
+			fyContributions
+				.filter((c) => CONCESSIONAL_TYPES.includes(c.type))
+				.reduce((sum, c) => sum + c.amount, 0),
+		[fyContributions],
+	);
+
+	const CONCESSIONAL_CAP = 30_000;
+
+	// ── Snapshot helpers ──────────────────────────────────
 	const sorted = [...snapshots].sort((a, b) =>
 		a.recorded_date.localeCompare(b.recorded_date),
 	);
@@ -139,6 +209,38 @@ function SuperAnalysisOverviewPage() {
 			)
 		) {
 			deleteMut.mutate(s.id);
+		}
+	};
+
+	// ── Contribution handlers ──────────────────────────────
+	const handleOpenCreateContrib = () => {
+		setEditingContrib(null);
+		setContribDialogOpen(true);
+	};
+
+	const handleOpenEditContrib = (c: Contribution) => {
+		setEditingContrib(c);
+		setContribDialogOpen(true);
+	};
+
+	const handleContribSubmit = (
+		data: ContributionInsert | ContributionUpdate,
+		id?: string,
+	) => {
+		if (id) {
+			updateContribMut.mutate({ id, data: data as ContributionUpdate });
+		} else {
+			createContribMut.mutate(data as ContributionInsert);
+		}
+	};
+
+	const handleDeleteContrib = (c: Contribution) => {
+		if (
+			window.confirm(
+				`Delete ${CONTRIBUTION_TYPE_LABELS[c.type]} contribution of ${fmtCurrency(c.amount)} on ${fmtDate(c.date)}?`,
+			)
+		) {
+			deleteContribMut.mutate(c.id);
 		}
 	};
 
@@ -328,6 +430,168 @@ function SuperAnalysisOverviewPage() {
 				</CardContent>
 			</Card>
 
+			{/* ── Contributions Section ────────────────────────── */}
+			{activeAccountId && (
+				<>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<Card>
+							<CardContent className="p-5">
+								<p className="text-sm text-muted-foreground">
+									FY {currentFY} — Total Contributions
+								</p>
+								<p className="mt-1 text-2xl font-bold text-foreground">
+									{fmtCurrency(
+										fyContributions.reduce((s, c) => s + c.amount, 0),
+									)}
+								</p>
+								<p className="mt-1 text-xs text-muted-foreground">
+									{fyContributions.length} record{fyContributions.length !== 1 ? "s" : ""} this FY
+								</p>
+							</CardContent>
+						</Card>
+						<Card>
+							<CardContent className="p-5">
+								<p className="text-sm text-muted-foreground">
+									Concessional Cap ({currentFY})
+								</p>
+								<p className="mt-1 text-2xl font-bold text-foreground">
+									{fmtCurrency(concessionalTotal)}{" "}
+									<span className="text-sm font-normal text-muted-foreground">
+										/ {fmtCurrency(CONCESSIONAL_CAP)}
+									</span>
+								</p>
+								<div className="mt-2 h-2 w-full rounded-full bg-muted overflow-hidden">
+									<div
+										className={`h-full rounded-full transition-all ${
+											concessionalTotal / CONCESSIONAL_CAP > 0.9
+												? "bg-red-500"
+												: concessionalTotal / CONCESSIONAL_CAP > 0.7
+													? "bg-amber-500"
+													: "bg-green-500"
+										}`}
+										style={{
+											width: `${Math.min(100, (concessionalTotal / CONCESSIONAL_CAP) * 100)}%`,
+										}}
+									/>
+								</div>
+								<p className="mt-1 text-xs text-muted-foreground">
+									{fmtCurrency(Math.max(0, CONCESSIONAL_CAP - concessionalTotal))} remaining
+								</p>
+							</CardContent>
+						</Card>
+					</div>
+
+					<Card>
+						<CardContent className="p-0">
+							<div className="flex items-center justify-between border-b px-5 py-3">
+								<h2 className="text-sm font-semibold text-foreground">
+									Contribution Records
+								</h2>
+								<Button size="sm" variant="outline" onClick={handleOpenCreateContrib}>
+									<Plus className="mr-1.5 size-3.5" />
+									Add
+								</Button>
+							</div>
+							{contributions.length === 0 ? (
+								<div className="flex flex-col items-center py-12">
+									<div className="flex size-14 items-center justify-center rounded-full bg-muted">
+										<DollarSign className="size-7 text-muted-foreground" />
+									</div>
+									<p className="mt-3 text-sm font-medium text-foreground">
+										No contributions recorded
+									</p>
+									<p className="mt-1 text-xs text-muted-foreground">
+										Record employer SG, salary sacrifice, or personal contributions.
+									</p>
+									<Button
+										size="sm"
+										className="mt-4"
+										onClick={handleOpenCreateContrib}
+									>
+										<Plus className="mr-1.5 size-4" />
+										Add Contribution
+									</Button>
+								</div>
+							) : (
+								<div className="overflow-x-auto">
+									<table className="w-full text-sm">
+										<thead>
+											<tr className="border-b text-left text-muted-foreground">
+												<th className="px-5 py-2.5 font-medium">Date</th>
+												<th className="px-5 py-2.5 font-medium">Type</th>
+												<th className="px-5 py-2.5 font-medium text-right">
+													Amount
+												</th>
+												<th className="px-5 py-2.5 font-medium">FY</th>
+												<th className="px-5 py-2.5 font-medium">Notes</th>
+												<th className="px-5 py-2.5 font-medium text-right w-20">
+													Actions
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											{contributions.map((c) => (
+												<tr
+													key={c.id}
+													className="border-b last:border-0 hover:bg-muted/30"
+												>
+													<td className="px-5 py-2.5 font-medium whitespace-nowrap">
+														{fmtDate(c.date)}
+													</td>
+													<td className="px-5 py-2.5">
+														<Badge
+															variant={
+																CONCESSIONAL_TYPES.includes(c.type)
+																	? "default"
+																	: "secondary"
+															}
+															className="text-[10px]"
+														>
+															{CONTRIBUTION_TYPE_LABELS[c.type]}
+														</Badge>
+													</td>
+													<td className="px-5 py-2.5 text-right tabular-nums">
+														{fmtCurrency(c.amount)}
+													</td>
+													<td className="px-5 py-2.5 text-muted-foreground text-xs">
+														{c.financial_year}
+													</td>
+													<td className="px-5 py-2.5 text-xs text-muted-foreground max-w-[200px] truncate">
+														{c.employer_name || c.notes || "—"}
+													</td>
+													<td className="px-5 py-2.5 text-right">
+														<div className="flex justify-end gap-1">
+															<Button
+																variant="ghost"
+																size="sm"
+																className="size-7 p-0"
+																onClick={() => handleOpenEditContrib(c)}
+																title="Edit"
+															>
+																<Pencil className="size-3.5" />
+															</Button>
+															<Button
+																variant="ghost"
+																size="sm"
+																className="size-7 p-0 text-destructive hover:text-destructive"
+																onClick={() => handleDeleteContrib(c)}
+																title="Delete"
+															>
+																<Trash2 className="size-3.5" />
+															</Button>
+														</div>
+													</td>
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				</>
+			)}
+
 			<SnapshotFormDialog
 				open={dialogOpen}
 				onOpenChange={setDialogOpen}
@@ -336,6 +600,15 @@ function SuperAnalysisOverviewPage() {
 				latestSnapshotDate={latestSnapshotDate}
 				onSubmit={handleSubmit}
 				isPending={createMut.isPending || updateMut.isPending}
+			/>
+
+			<ContributionFormDialog
+				open={contribDialogOpen}
+				onOpenChange={setContribDialogOpen}
+				contribution={editingContrib}
+				superAccountId={activeAccountId ?? ""}
+				onSubmit={handleContribSubmit}
+				isPending={createContribMut.isPending || updateContribMut.isPending}
 			/>
 		</div>
 	);
