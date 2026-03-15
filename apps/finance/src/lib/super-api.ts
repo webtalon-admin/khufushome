@@ -4,6 +4,9 @@ import type {
 	BalanceSnapshotInsert,
 	BalanceSnapshotUpdate,
 	BtcPriceMonthly,
+	Contribution,
+	ContributionInsert,
+	ContributionUpdate,
 	FundFee,
 	FundReference,
 	FundReturn,
@@ -106,6 +109,66 @@ export async function createFundSwitch(
 
 	if (error) throw error;
 	return data as FundSwitch;
+}
+
+// ── Contributions ─────────────────────────────────────────
+
+export async function fetchContributions(
+	accountId?: string,
+): Promise<Contribution[]> {
+	let query = supabase()
+		.from("super_contributions")
+		.select("*")
+		.order("date", { ascending: false });
+
+	if (accountId) {
+		query = query.eq("super_account_id", accountId);
+	}
+
+	const { data, error } = await query;
+	if (error) throw error;
+	return data as Contribution[];
+}
+
+export async function createContribution(
+	input: ContributionInsert,
+): Promise<Contribution> {
+	const {
+		data: { user },
+	} = await supabase().auth.getUser();
+	if (!user) throw new Error("Not authenticated");
+
+	const { data, error } = await supabase()
+		.from("super_contributions")
+		.insert({ ...input, user_id: user.id })
+		.select()
+		.single();
+
+	if (error) throw error;
+	return data as Contribution;
+}
+
+export async function updateContribution(
+	id: string,
+	updates: ContributionUpdate,
+): Promise<Contribution> {
+	const { data, error } = await supabase()
+		.from("super_contributions")
+		.update(updates)
+		.eq("id", id)
+		.select()
+		.single();
+
+	if (error) throw error;
+	return data as Contribution;
+}
+
+export async function deleteContribution(id: string): Promise<void> {
+	const { error } = await supabase()
+		.from("super_contributions")
+		.delete()
+		.eq("id", id);
+	if (error) throw error;
 }
 
 // ── Balance Snapshots ──────────────────────────────────────
