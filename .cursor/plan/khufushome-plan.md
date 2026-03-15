@@ -1217,8 +1217,7 @@ All pipeline code lives in the monorepo. The `research/super-research/` folder i
 - [x] **Initial seed** — `supabase/seed.sql` seeds dev users, a super account, and 22 quarterly balance snapshots (Sep 2020 – Dec 2025). First 19 quarters estimated from `research/super-research/config/personal.yaml` annual anchors; last 3 quarters (Q2–Q4 2025) use actual transaction data from the user's Future Super account.
 - [x] **Supabase cron schedule** — `pg_cron` + `pg_net` migration with `invoke_edge_function()` helper that reads URL/key from Supabase Vault. YourSuper: quarterly on 2nd Jan/Apr/Jul/Oct at 03:00 UTC. BTC price: monthly on 16th at 04:00 UTC. Gracefully skips if vault secrets not configured (local dev).
 - [ ] **GitHub Actions cron** (optional) — quarterly workflow that runs the APRA Python script (needs `SUPABASE_SERVICE_ROLE_KEY` secret)
-- [ ] **Manual trigger** — "Refresh Data" button in the Finance app's Research section that invokes the YourSuper Edge Function on-demand
-- [ ] **Data freshness UI** — display "Data as of: {date} (APRA QSPS)" on Research pages, sourced from `data_pipeline_logs`
+- [x] **Manual trigger + Data freshness UI** — `DataFreshness` component on all Research pages showing last pipeline run status/time for APRA, YourSuper, and BTC pipelines. YourSuper and BTC have "Refresh" buttons that invoke Edge Functions via `supabase.functions.invoke()`. APRA shows `pnpm pipeline:apra` hint (Python script, not an Edge Function). Error messages displayed inline. Polls every 30s.
 
 #### Phase 3F: Super Analysis + Research
 

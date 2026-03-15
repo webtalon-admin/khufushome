@@ -73,3 +73,14 @@ export const SMSF_DEFAULTS = {
 	annualCost: 3318,
 	exchangeFeePct: 0.005,
 } as const;
+
+export interface PipelineLog {
+	id: string;
+	pipeline: string;
+	status: "running" | "success" | "error";
+	rows_upserted: number;
+	error_message: string | null;
+	source_date: string | null;
+	started_at: string;
+	completed_at: string | null;
+}

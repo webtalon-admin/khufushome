@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DataFreshness } from "../../../components/super/DataFreshness";
 import { SuperNav } from "../../../components/super/SuperNav";
 
 export const Route = createFileRoute("/super/research/allocations")({
@@ -17,6 +18,7 @@ function AllocationsPage() {
 					Compare fund asset allocations and growth/defensive splits.
 				</p>
 			</div>
+			<DataFreshness />
 		</div>
 	);
 }
