@@ -14,21 +14,29 @@ import {
 	Outlet,
 	createRootRouteWithContext,
 	useMatchRoute,
+	useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import type { LucideIcon } from "lucide-react";
 import {
+	BarChart3,
 	Briefcase,
 	Calculator,
+	ChevronRight,
 	CreditCard,
+	FileText,
 	Home,
 	Landmark,
 	LineChart,
 	LogOut,
+	PieChart,
 	PiggyBank,
 	Settings,
+	TrendingUp,
 	User,
 	Wallet,
 } from "lucide-react";
+import { useState } from "react";
 import { LoginPage } from "../pages/LoginPage";
 
 const cfg = getClientConfig();
@@ -47,17 +55,42 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 	component: RootComponent,
 });
 
-const sidebarNavItems = [
+interface NavChild {
+	to: string;
+	label: string;
+	icon: LucideIcon;
+}
+
+interface NavItem {
+	to: string;
+	label: string;
+	icon: LucideIcon;
+	children?: NavChild[];
+}
+
+const sidebarNavItems: NavItem[] = [
 	{ to: "/", label: "Home", icon: Home },
 	{ to: "/accounts", label: "Accounts", icon: Wallet },
 	{ to: "/transactions", label: "Transactions", icon: CreditCard },
 	{ to: "/loans", label: "Loans", icon: Landmark },
 	{ to: "/portfolio", label: "Portfolio", icon: LineChart },
-	{ to: "/super", label: "Super", icon: PiggyBank },
+	{
+		to: "/super",
+		label: "Super",
+		icon: PiggyBank,
+		children: [
+			{ to: "/super/analysis", label: "Overview", icon: BarChart3 },
+			{ to: "/super/analysis/historical", label: "Historical", icon: LineChart },
+			{ to: "/super/analysis/projections", label: "Projections", icon: TrendingUp },
+			{ to: "/super/research", label: "Research", icon: FileText },
+			{ to: "/super/research/allocations", label: "Allocations", icon: PieChart },
+			{ to: "/super/research/fees", label: "Fees", icon: Calculator },
+		],
+	},
 	{ to: "/budget", label: "Budget", icon: Briefcase },
 	{ to: "/tax", label: "Tax", icon: Calculator },
 	{ to: "/settings", label: "Settings", icon: Settings },
-] as const;
+];
 
 function UserMenu() {
 	const { user } = useAuth();
@@ -84,8 +117,39 @@ function UserMenu() {
 	);
 }
 
+function SidebarNavLink({
+	to,
+	icon: Icon,
+	label,
+	isActive,
+	indent,
+}: {
+	to: string;
+	icon: LucideIcon;
+	label: string;
+	isActive: boolean;
+	indent?: boolean;
+}) {
+	return (
+		<Link
+			to={to}
+			className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${indent ? "pl-10" : ""} ${
+				isActive
+					? "bg-sidebar-accent text-sidebar-foreground"
+					: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+			}`}
+		>
+			<Icon className="size-4" />
+			{label}
+		</Link>
+	);
+}
+
 function SidebarNav() {
 	const matchRoute = useMatchRoute();
+	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const isSuperSection = pathname.startsWith("/super");
+	const [superOpen, setSuperOpen] = useState(isSuperSection);
 
 	return (
 		<nav className="flex-1 space-y-1 px-3 py-4">
@@ -95,19 +159,68 @@ function SidebarNav() {
 						? matchRoute({ to: "/", fuzzy: false })
 						: matchRoute({ to: item.to, fuzzy: true });
 
+				if (item.children) {
+					return (
+						<div key={item.to}>
+							<button
+								type="button"
+								onClick={() => setSuperOpen((v) => !v)}
+								className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+									isActive
+										? "bg-sidebar-accent text-sidebar-foreground"
+										: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+								}`}
+							>
+								<item.icon className="size-4" />
+								{item.label}
+								<ChevronRight
+									className={`ml-auto size-4 transition-transform duration-200 ${superOpen ? "rotate-90" : ""}`}
+								/>
+							</button>
+
+							<div
+								className={`overflow-hidden transition-all duration-200 ${superOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+							>
+								<SidebarNavLink
+									to={item.to}
+									icon={item.icon}
+									label="Dashboard"
+									isActive={
+										!!matchRoute({ to: item.to, fuzzy: false })
+									}
+									indent
+								/>
+								{item.children.map((child) => {
+									const childActive = !!matchRoute({
+										to: child.to,
+										fuzzy: child.to.endsWith("/research")
+											? false
+											: true,
+									});
+									return (
+										<SidebarNavLink
+											key={child.to}
+											to={child.to}
+											icon={child.icon}
+											label={child.label}
+											isActive={childActive}
+											indent
+										/>
+									);
+								})}
+							</div>
+						</div>
+					);
+				}
+
 				return (
-					<Link
+					<SidebarNavLink
 						key={item.to}
 						to={item.to}
-						className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-							isActive
-								? "bg-sidebar-accent text-sidebar-foreground"
-								: "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-						}`}
-					>
-						<item.icon className="size-4" />
-						{item.label}
-					</Link>
+						icon={item.icon}
+						label={item.label}
+						isActive={!!isActive}
+					/>
 				);
 			})}
 		</nav>

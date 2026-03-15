@@ -2,6 +2,7 @@ import { Button, Card, CardContent, Input } from "@khufushome/ui";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { SuperNav } from "../../../components/super/SuperNav";
 import { useMemo, useState } from "react";
 import {
 	CartesianGrid,
@@ -157,6 +158,7 @@ function SuperHistoricalPage() {
 
 	return (
 		<div className="space-y-6">
+			<SuperNav />
 			<div>
 				<h1 className="font-display text-2xl font-bold text-foreground">
 					Super Analysis — Historical Performance
