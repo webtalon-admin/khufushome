@@ -280,6 +280,8 @@ function SuperAnalysisOverviewPage() {
 				</Card>
 			)}
 
+			<AuBenchmarkCard currentBalance={latest?.balance ?? null} />
+
 			{latest && (
 				<div className="grid gap-4 sm:grid-cols-3">
 					<Card>
@@ -315,8 +317,6 @@ function SuperAnalysisOverviewPage() {
 					</Card>
 				</div>
 			)}
-
-			<AuBenchmarkCard currentBalance={latest?.balance ?? null} />
 
 			<Card>
 				<CardContent className="p-0">

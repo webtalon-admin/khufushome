@@ -264,14 +264,12 @@ export function AuBenchmarkCard({
 					/>
 				)}
 
-				{/* Metric table for your age group */}
-				{viewMode === "your-age" && (
-					<MetricTable
-						row={ageRow}
-						gender={gender}
-						balance={currentBalance}
-					/>
-				)}
+				{/* Comparison cards like the Python app */}
+				<ComparisonCards
+					row={ageRow}
+					gender={gender}
+					balance={currentBalance}
+				/>
 
 				<p className="text-[10px] text-muted-foreground">
 					Source: {ageRow.source}. Balances are for
@@ -419,7 +417,7 @@ function AllAgesChart({
 	);
 }
 
-function MetricTable({
+function ComparisonCards({
 	row,
 	gender,
 	balance,
@@ -429,67 +427,66 @@ function MetricTable({
 	balance: number | null;
 }) {
 	const g = gender;
-	const metrics: { label: string; value: number }[] = [
-		{
-			label: "Median (50th)",
-			value: g === "male" ? row.male_median : row.female_median,
-		},
-	];
+	const gLabel = `${gender === "male" ? "Male" : "Female"} ${row.age_group}`;
+
+	const metrics: { label: string; sublabel: string; value: number }[] = [];
+
+	metrics.push({
+		label: "Median",
+		sublabel: gLabel,
+		value: g === "male" ? row.male_median : row.female_median,
+	});
 
 	const avg = g === "male" ? row.male_average : row.female_average;
 	if (avg != null) {
-		metrics.push({ label: "Average", value: avg });
+		metrics.push({ label: "Average", sublabel: gLabel, value: avg });
 	}
 
 	metrics.push({
 		label: "75th Percentile",
+		sublabel: gLabel,
 		value: g === "male" ? row.male_p75 : row.female_p75,
 	});
 	metrics.push({
 		label: "90th Percentile",
+		sublabel: gLabel,
 		value: g === "male" ? row.male_p90 : row.female_p90,
 	});
 
 	return (
-		<div className="overflow-x-auto">
-			<table className="w-full text-xs">
-				<thead>
-					<tr className="border-b text-left text-muted-foreground">
-						<th className="py-1.5 pr-4 font-medium">Percentile</th>
-						<th className="py-1.5 pr-4 font-medium text-right">
-							AU Benchmark
-						</th>
-						{balance != null && (
-							<th className="py-1.5 font-medium text-right">
-								vs You
-							</th>
-						)}
-					</tr>
-				</thead>
-				<tbody>
-					{metrics.map((m) => (
-						<tr key={m.label} className="border-b last:border-0">
-							<td className="py-1.5 pr-4 text-muted-foreground">
-								{m.label}
-							</td>
-							<td className="py-1.5 pr-4 text-right tabular-nums font-medium">
+		<div>
+			<h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+				How You Compare to Other Australians
+			</h4>
+			<div className="grid gap-3 grid-cols-2 lg:grid-cols-5">
+				{balance != null && (
+					<div className="rounded-lg border bg-green-500/5 border-green-500/20 p-3">
+						<p className="text-[11px] text-muted-foreground">Your Balance</p>
+						<p className="mt-1 text-lg font-bold text-foreground tabular-nums">
+							{fmtCurrency(balance)}
+						</p>
+					</div>
+				)}
+				{metrics.map((m) => {
+					const diff = balance != null ? balance - m.value : null;
+					const isAbove = diff != null && diff >= 0;
+					return (
+						<div key={m.label} className="rounded-lg border p-3">
+							<p className="text-[11px] text-muted-foreground truncate" title={`${m.label} (${m.sublabel})`}>
+								{m.label} ({m.sublabel})
+							</p>
+							<p className="mt-1 text-lg font-bold text-foreground tabular-nums">
 								{fmtCurrency(m.value)}
-							</td>
-							{balance != null && (
-								<td
-									className={`py-1.5 text-right tabular-nums font-medium ${
-										balance >= m.value
-											? "text-green-600"
-											: "text-amber-600"
-									}`}
-								>
-									{pctDiff(balance, m.value)}
-								</td>
+							</p>
+							{diff != null && (
+								<p className={`mt-0.5 text-[11px] font-medium ${isAbove ? "text-green-600" : "text-red-500"}`}>
+									{isAbove ? "↑" : "↓"} You&apos;re {fmtCurrency(Math.abs(diff))} {isAbove ? "above" : "below"}
+								</p>
 							)}
-						</tr>
-					))}
-				</tbody>
-			</table>
+						</div>
+					);
+				})}
+			</div>
 		</div>
 	);
 }
