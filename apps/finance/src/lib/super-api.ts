@@ -147,16 +147,32 @@ export async function fetchLatestPipelineLogs(): Promise<
 
 // ── Edge Function Invocation ───────────────────────────────
 
+const INVOKE_TIMEOUT_MS = 120_000;
+
 export async function invokeEdgeFunction(
 	functionName: string,
 ): Promise<{ ok: boolean; error?: string }> {
-	const { data, error } = await supabase().functions.invoke(functionName, {
-		method: "POST",
-	});
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), INVOKE_TIMEOUT_MS);
 
-	if (error) {
-		return { ok: false, error: error.message };
+	try {
+		const { data, error } = await supabase().functions.invoke(functionName, {
+			method: "POST",
+			body: {},
+			signal: controller.signal,
+		});
+
+		if (error) {
+			return { ok: false, error: error.message };
+		}
+
+		return (data as { ok: boolean; error?: string }) ?? { ok: true };
+	} catch (err) {
+		if (err instanceof DOMException && err.name === "AbortError") {
+			return { ok: false, error: "Request timed out (2 min)" };
+		}
+		return { ok: false, error: String(err) };
+	} finally {
+		clearTimeout(timer);
 	}
-
-	return (data as { ok: boolean; error?: string }) ?? { ok: true };
 }
