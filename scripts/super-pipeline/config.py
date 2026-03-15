@@ -17,81 +17,92 @@ APRA_URLS = {
 
 ATO_YOURSUPER_URL = "https://www.ato.gov.au/api/v1/YourSuper/APRAData"
 
-# Known APRA CSV column names (Historical Performance).
-# The exact header names vary slightly between releases — these are the
-# known patterns from December 2025 QSPS / Heatmap publications.
+# ─────────────────────────────────────────────────────────────
+# APRA Historical Performance CSV column candidates.
+#
+# Actual Dec-2025 QSPS columns (verified via --inspect):
+#   rse_abn, fund_name, investment_option_name, period_end_date,
+#   return_measurement_comparison_percent,
+#   return_investment_five_year_volatility_comparison_percent,
+#   return_investment_ten_year_volatility_comparison_percent
+#
+# The CSV has one row per fund per quarter.  `return_measurement_comparison_percent`
+# is a quarterly return (decimal, e.g. 0.026640 = 2.66%).  There are no pre-computed
+# annualised 1yr/5yr/10yr return columns — annual FY returns must be compounded
+# from the 4 quarterly figures.
+# ─────────────────────────────────────────────────────────────
 PERF_COL = {
-    "abn": ["ABN", "Fund_ABN", "RSE_ABN"],
-    "rse_name": ["RSE Name", "RSE_Name", "rse_name", "Fund Name", "Fund_Name"],
+    "abn": ["rse_abn", "RSE_ABN", "ABN", "Fund_ABN"],
+    "rse_name": ["fund_name", "Fund Name", "Fund_Name", "rse_name", "RSE Name", "RSE_Name"],
     "product_name": [
-        "Investment Option Name", "Investment_Option_Name",
-        "MySuper Product Name", "MySuper_Product_Name",
-        "mysuper_product_name", "Product Name", "Product_Name",
+        "investment_option_name", "Investment Option Name", "Investment_Option_Name",
+        "mysuper_product_name", "MySuper Product Name", "Product Name",
     ],
     "quarter_end": [
-        "Reporting Quarter End Date", "Reporting_Quarter_End_Date",
-        "Quarter End Date", "Quarter_End_Date", "Period",
+        "period_end_date", "Period End Date", "Period_End_Date",
+        "Reporting Quarter End Date", "Quarter End Date", "Period",
     ],
-    "return_1yr": [
-        "1 Year Rate of Return", "1_year_net_investment_return_nir_p_a",
-        "1 Year Net Investment Return",
-    ],
-    "return_3yr": [
-        "3 Year Rate of Return", "3_year_net_investment_return_nir_p_a",
-        "3 Year Net Investment Return",
-    ],
-    "return_5yr": [
-        "5 Year Rate of Return", "5_year_net_investment_return_nir_p_a",
-        "5 Year Net Investment Return",
-    ],
-    "return_7yr": [
-        "7 Year Rate of Return", "7_year_net_investment_return_nir_p_a",
-        "7 Year Net Investment Return",
-    ],
-    "return_10yr": [
-        "10 Year Rate of Return", "10_year_net_investment_return_nir_p_a",
-        "10 Year Net Investment Return",
+    "quarterly_return": [
+        "return_measurement_comparison_percent",
+        "Return Measurement Comparison Percent",
     ],
 }
 
+# ─────────────────────────────────────────────────────────────
+# APRA Historical SAA CSV column candidates.
+#
+# Actual Dec-2025 QSPS columns (verified via --inspect):
+#   rse_abn, rse_name, investment_option_name, time_key (YYYYMMDD),
+#   InvestmentStrategicSectorType, InvestmentBenchmarkAllocationPercent,
+#   ConsolidatedSectorType, ConsolidatedDomicileType, etc.
+#
+# The CSV is in LONG format — one row per fund per sector per quarter.
+# We must pivot rows into our wide schema (one row per fund with separate
+# columns for australian_equities, international_equities, etc.).
+# ─────────────────────────────────────────────────────────────
 SAA_COL = {
-    "abn": PERF_COL["abn"],
-    "rse_name": PERF_COL["rse_name"],
-    "product_name": PERF_COL["product_name"],
-    "quarter_end": PERF_COL["quarter_end"],
-    "australian_equities": [
-        "Australian Equities", "Australian_Equities",
-        "Australian Listed Equity", "Australian_Listed_Equity",
+    "abn": ["rse_abn", "RSE_ABN", "ABN"],
+    "rse_name": ["rse_name", "RSE Name", "fund_name", "Fund Name"],
+    "product_name": [
+        "investment_option_name", "Investment Option Name",
+        "mysuper_product_name", "Product Name",
     ],
-    "international_equities": [
-        "International Equities", "International_Equities",
-        "International Listed Equity", "International_Listed_Equity",
+    "quarter_end": [
+        "time_key", "Time_Key", "period_end_date",
+        "Period End Date", "Quarter End Date",
     ],
-    "property": ["Property", "Direct Property", "Listed Property"],
-    "infrastructure": ["Infrastructure", "Listed Infrastructure"],
-    "private_equity": ["Private Equity", "Private_Equity", "Unlisted Equity"],
-    "alternatives": ["Other", "Other Assets", "Alternatives"],
-    "fixed_income": ["Fixed Income", "Fixed_Income", "Bonds"],
-    "cash": ["Cash", "Cash and Short Term Securities"],
+    "sector_type": [
+        "InvestmentStrategicSectorType",
+        "ConsolidatedSectorType",
+    ],
+    "domicile": [
+        "InvestmentStrategicSectorDomicileType",
+        "ConsolidatedDomicileType",
+    ],
+    "allocation_pct": [
+        "InvestmentBenchmarkAllocationPercent",
+        "Investment Benchmark Allocation Percent",
+    ],
 }
 
-FEES_COL = {
-    "abn": PERF_COL["abn"],
-    "rse_name": PERF_COL["rse_name"],
-    "product_name": PERF_COL["product_name"],
-    "admin_fees_50k": [
-        "administration_fees_disclosed_50_000_account_balance",
-        "Administration Fees (50k)", "Admin Fee 50000",
-    ],
-    "total_fees_50k": [
-        "total_fees_disclosed_50_000_account_balance",
-        "Total Fees (50k)", "Total Fee 50000",
-    ],
-    "total_fees_100k": [
-        "total_fees_disclosed_100_000_account_balance",
-        "Total Fees (100k)", "Total Fee 100000",
-    ],
+# Mapping from APRA sector type values to our DB columns.
+# The SAA CSV uses InvestmentStrategicSectorType + domicile to distinguish
+# Australian vs International equities.
+SAA_SECTOR_MAP = {
+    "cash": "cash",
+    "fixed income": "fixed_income",
+    "credit": "fixed_income",
+    "bonds": "fixed_income",
+    "property": "property",
+    "infrastructure": "infrastructure",
+    "private equity": "private_equity",
+    "unlisted equity": "private_equity",
 }
+
+# Equity is split by domicile:
+#   "Australian Domicile" -> australian_equities
+#   Everything else       -> international_equities
+SAA_EQUITY_SECTORS = {"equity", "equities", "listed equity"}
 
 
 @dataclass

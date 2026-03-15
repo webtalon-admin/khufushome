@@ -5,21 +5,31 @@ Downloads the Historical Performance and Historical SAA CSVs from APRA,
 filters for tracked funds (by ABN + option name), transforms rows into
 Supabase table schemas, and upserts idempotently.
 
+Historical Performance CSV structure (Dec 2025 QSPS):
+  - One row per fund per quarter
+  - `return_measurement_comparison_percent` is a quarterly return (decimal)
+  - Annual FY returns are compounded from the 4 quarterly figures
+
+Historical SAA CSV structure (Dec 2025 QSPS):
+  - Long format: one row per fund per sector per quarter
+  - Pivoted into wide format (one row per fund) for our DB schema
+
 Usage:
     python ingest_apra.py                # download + ingest
     python ingest_apra.py --seed         # run seed.py first, then ingest
     python ingest_apra.py --inspect      # download and print CSV structure (no DB writes)
-    python ingest_apra.py --local FILE   # use a local CSV instead of downloading
+    python ingest_apra.py --local-perf FILE  # use a local CSV instead of downloading
+    python ingest_apra.py --local-saa FILE   # use a local SAA CSV
 
 Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars (except --inspect).
 """
 
 import argparse
+import math
 import os
 import sys
 import tempfile
 from datetime import date, datetime
-from pathlib import Path
 
 import pandas as pd
 import requests
@@ -27,16 +37,20 @@ from supabase import create_client
 
 from config import (
     APRA_URLS,
-    FEES_COL,
     FUND_ABN_MAP,
     PERF_COL,
     SAA_COL,
-    TRACKED_FUNDS,
+    SAA_EQUITY_SECTORS,
+    SAA_SECTOR_MAP,
 )
 
 CHUNK_SIZE = 8192
 BATCH_SIZE = 500
 
+
+# ─────────────────────────────────────────────────────────────
+#  Shared helpers
+# ─────────────────────────────────────────────────────────────
 
 def get_supabase():
     url = os.environ.get("SUPABASE_URL")
@@ -108,12 +122,8 @@ def resolve_columns(df_columns: list[str], col_map: dict) -> dict[str, str | Non
     return resolved
 
 
-def filter_tracked_funds(df: pd.DataFrame, abn_col: str | None) -> pd.DataFrame:
+def filter_tracked_funds(df: pd.DataFrame, abn_col: str) -> pd.DataFrame:
     """Filter DataFrame to only rows matching tracked fund ABNs."""
-    if abn_col is None:
-        print("  WARNING: No ABN column found — cannot filter by fund. Returning empty.")
-        return df.iloc[0:0]
-
     df[abn_col] = df[abn_col].astype(str).str.strip().str.replace(" ", "")
     tracked_abns = set(FUND_ABN_MAP.keys())
     filtered = df[df[abn_col].isin(tracked_abns)].copy()
@@ -141,16 +151,22 @@ def match_fund_id(abn: str, product_name: str) -> str | None:
     return None
 
 
-def quarter_to_fy(quarter_str: str) -> str | None:
-    """
-    Convert a quarter end date string to an Australian financial year label.
-    e.g. "2025-06-30" -> "FY2025", "2024-12-31" -> "FY2025"
-    AU FY runs Jul 1 to Jun 30.  FY2025 = Jul 2024 - Jun 2025.
-    """
+def parse_period(raw) -> pd.Timestamp | None:
+    """Parse period_end_date (dd/mm/yyyy) or time_key (YYYYMMDD) into a Timestamp."""
+    s = str(raw).strip()
+    if len(s) == 8 and s.isdigit():
+        try:
+            return pd.Timestamp(year=int(s[:4]), month=int(s[4:6]), day=int(s[6:8]))
+        except ValueError:
+            return None
     try:
-        dt = pd.to_datetime(quarter_str)
+        return pd.to_datetime(s, dayfirst=True)
     except Exception:
         return None
+
+
+def period_to_fy(dt: pd.Timestamp) -> str:
+    """AU financial year label: Jul-Jun. FY2025 = Jul 2024 - Jun 2025."""
     if dt.month >= 7:
         return f"FY{dt.year + 1}"
     return f"FY{dt.year}"
@@ -174,14 +190,13 @@ def inspect_csv(csv_path: str, label: str):
 
 # ─────────────────────────────────────────────────────────────
 #  Historical Performance -> super_fund_returns
+#
+#  The CSV has quarterly return figures as decimals.
+#  We compound Q1*Q2*Q3*Q4 within each FY to get annual returns:
+#    FY2025 quarters: Sep-2024, Dec-2024, Mar-2025, Jun-2025
 # ─────────────────────────────────────────────────────────────
 
 def ingest_historical_performance(sb, csv_path: str | None = None) -> int:
-    """
-    Download (or use provided) APRA Historical Performance CSV,
-    filter for tracked funds, extract the latest quarterly return data,
-    and upsert into super_fund_returns.
-    """
     started_at = datetime.utcnow()
 
     if csv_path is None:
@@ -200,104 +215,104 @@ def ingest_historical_performance(sb, csv_path: str | None = None) -> int:
 
     cols = resolve_columns(df.columns.tolist(), PERF_COL)
     print(f"  Resolved columns: { {k: v for k, v in cols.items() if v} }")
-    missing = [k for k in ("abn", "quarter_end") if cols[k] is None]
-    if missing:
-        err = f"Missing required columns: {missing}. Available: {df.columns.tolist()[:20]}"
+
+    abn_col = cols.get("abn")
+    qtr_col = cols.get("quarter_end")
+    ret_col = cols.get("quarterly_return")
+    product_col = cols.get("product_name")
+
+    if not abn_col or not qtr_col or not ret_col:
+        missing = [k for k in ("abn", "quarter_end", "quarterly_return") if not cols.get(k)]
+        err = f"Missing required columns: {missing}. Available: {df.columns.tolist()[:15]}"
         print(f"  ERROR: {err}")
         log_pipeline(sb, "apra_performance", "error", error=err, started_at=started_at)
         return 0
 
-    df = filter_tracked_funds(df, cols["abn"])
+    df = filter_tracked_funds(df, abn_col)
     if df.empty:
         log_pipeline(sb, "apra_performance", "success", rows=0, source_date=date.today(), started_at=started_at)
         return 0
 
-    product_col = cols["product_name"]
+    df["_period"] = df[qtr_col].apply(parse_period)
+    df = df.dropna(subset=["_period"])
+    df[ret_col] = pd.to_numeric(df[ret_col], errors="coerce")
+    df = df.dropna(subset=[ret_col])
 
-    # APRA provides quarterly snapshots with annualised returns over 1/3/5/7/10 yr windows.
-    # We want to extract the most recent FY return for each fund.
-    # Strategy: group by ABN + product, take the latest quarter, then store the
-    # 1-year net investment return as the FY return for that period.
-    qtr_col = cols["quarter_end"]
-    df[qtr_col] = pd.to_datetime(df[qtr_col], errors="coerce")
-    df = df.dropna(subset=[qtr_col])
+    df["_fund_id"] = df.apply(
+        lambda r: match_fund_id(
+            str(r[abn_col]).strip(),
+            str(r[product_col]).strip() if product_col else "",
+        ),
+        axis=1,
+    )
+    df = df[df["_fund_id"].notna()]
+    df["_fy"] = df["_period"].apply(period_to_fy)
 
-    return_col = cols.get("return_1yr")
-    if return_col is None:
-        for period in ("return_3yr", "return_5yr", "return_7yr", "return_10yr"):
-            if cols.get(period):
-                return_col = cols[period]
-                break
-    if return_col is None:
-        err = "No return columns found in CSV."
-        print(f"  ERROR: {err}")
-        log_pipeline(sb, "apra_performance", "error", error=err, started_at=started_at)
-        return 0
+    print(f"  Matched {len(df)} quarterly return rows across {df['_fund_id'].nunique()} funds.")
+    print(f"  FY range: {df['_fy'].min()} - {df['_fy'].max()}")
 
-    print(f"  Using return column: {return_col}")
-
+    # Compound quarterly returns into annual FY returns.
+    # (1 + r1) * (1 + r2) * ... * (1 + rN) - 1
     rows_to_upsert = []
-    abn_col = cols["abn"]
-
-    for _, row in df.iterrows():
-        abn_val = str(row[abn_col]).strip()
-        product_val = str(row[product_col]).strip() if product_col else ""
-        fund_id = match_fund_id(abn_val, product_val)
-        if fund_id is None:
-            continue
-
-        fy = quarter_to_fy(row[qtr_col])
-        if fy is None:
-            continue
-
-        ret_val = row.get(return_col)
-        if pd.isna(ret_val):
-            continue
-
-        ret_pct = float(ret_val)
-        if abs(ret_pct) < 1:
-            ret_pct *= 100
+    for (fund_id, fy), group in df.groupby(["_fund_id", "_fy"]):
+        quarterly_returns = group[ret_col].values
+        compounded = 1.0
+        for qr in quarterly_returns:
+            compounded *= (1.0 + float(qr))
+        annual_return = (compounded - 1.0) * 100  # convert to percentage
 
         rows_to_upsert.append({
             "fund_id": fund_id,
             "fy": fy,
-            "return_pct": round(ret_pct, 2),
+            "return_pct": round(annual_return, 2),
             "return_type": "after_investment_fees",
-            "source": "APRA QSPS Historical Performance",
+            "source": f"APRA QSPS (compounded from {len(quarterly_returns)} quarters)",
         })
 
-    # Deduplicate: keep latest row per (fund_id, fy)
-    seen = {}
-    for r in rows_to_upsert:
-        key = (r["fund_id"], r["fy"])
-        seen[key] = r
-    unique_rows = list(seen.values())
+    print(f"  Prepared {len(rows_to_upsert)} annual FY return rows for upsert.")
 
-    print(f"  Prepared {len(unique_rows)} unique return rows for upsert.")
-
-    if unique_rows:
-        for i in range(0, len(unique_rows), BATCH_SIZE):
-            batch = unique_rows[i : i + BATCH_SIZE]
+    if rows_to_upsert:
+        for i in range(0, len(rows_to_upsert), BATCH_SIZE):
+            batch = rows_to_upsert[i : i + BATCH_SIZE]
             sb.table("super_fund_returns").upsert(batch, on_conflict="fund_id,fy").execute()
             print(f"  Upserted batch {i // BATCH_SIZE + 1} ({len(batch)} rows)")
 
     log_pipeline(
         sb, "apra_performance", "success",
-        rows=len(unique_rows), source_date=date.today(), started_at=started_at,
+        rows=len(rows_to_upsert), source_date=date.today(), started_at=started_at,
     )
-    return len(unique_rows)
+    return len(rows_to_upsert)
 
 
 # ─────────────────────────────────────────────────────────────
 #  Historical SAA -> super_fund_allocations
+#
+#  The CSV is in LONG format:
+#    fund | quarter | sector_type | domicile | allocation_pct
+#  We pivot into WIDE format:
+#    fund | australian_equities | international_equities | property | ...
+#
+#  Sector classification uses InvestmentStrategicSectorType.
+#  Equity is split by domicile (Australian Domicile vs others).
 # ─────────────────────────────────────────────────────────────
 
+def classify_sector(sector: str, domicile: str) -> str | None:
+    """Map an APRA sector+domicile pair to our DB column name."""
+    sector_lower = sector.lower().strip() if sector else ""
+    domicile_lower = domicile.lower().strip() if domicile else ""
+
+    if sector_lower in SAA_SECTOR_MAP:
+        return SAA_SECTOR_MAP[sector_lower]
+
+    if sector_lower in SAA_EQUITY_SECTORS:
+        if "australian" in domicile_lower or "domestic" in domicile_lower:
+            return "australian_equities"
+        return "international_equities"
+
+    return "alternatives"
+
+
 def ingest_historical_saa(sb, csv_path: str | None = None) -> int:
-    """
-    Download (or use provided) APRA Historical SAA CSV,
-    filter for tracked funds, extract the latest asset allocation snapshot,
-    and upsert into super_fund_allocations.
-    """
     started_at = datetime.utcnow()
 
     if csv_path is None:
@@ -316,62 +331,81 @@ def ingest_historical_saa(sb, csv_path: str | None = None) -> int:
 
     cols = resolve_columns(df.columns.tolist(), SAA_COL)
     print(f"  Resolved columns: { {k: v for k, v in cols.items() if v} }")
-    missing = [k for k in ("abn",) if cols[k] is None]
+
+    abn_col = cols.get("abn")
+    qtr_col = cols.get("quarter_end")
+    sector_col = cols.get("sector_type")
+    alloc_col = cols.get("allocation_pct")
+    product_col = cols.get("product_name")
+    domicile_col = cols.get("domicile")
+
+    required = {"abn": abn_col, "sector_type": sector_col, "allocation_pct": alloc_col}
+    missing = [k for k, v in required.items() if not v]
     if missing:
-        err = f"Missing required columns: {missing}. Available: {df.columns.tolist()[:20]}"
+        err = f"Missing required columns: {missing}. Available: {df.columns.tolist()[:15]}"
         print(f"  ERROR: {err}")
         log_pipeline(sb, "apra_saa", "error", error=err, started_at=started_at)
         return 0
 
-    df = filter_tracked_funds(df, cols["abn"])
+    df = filter_tracked_funds(df, abn_col)
     if df.empty:
         log_pipeline(sb, "apra_saa", "success", rows=0, source_date=date.today(), started_at=started_at)
         return 0
 
-    # Sort by quarter date descending to pick the latest allocation per fund
-    qtr_col = cols.get("quarter_end")
     if qtr_col:
-        df[qtr_col] = pd.to_datetime(df[qtr_col], errors="coerce")
-        df = df.sort_values(qtr_col, ascending=False)
+        df["_period"] = df[qtr_col].apply(parse_period)
+        df = df.dropna(subset=["_period"])
+    else:
+        df["_period"] = pd.Timestamp.now()
 
-    abn_col = cols["abn"]
-    product_col = cols.get("product_name")
+    df[alloc_col] = pd.to_numeric(df[alloc_col], errors="coerce")
+
+    df["_fund_id"] = df.apply(
+        lambda r: match_fund_id(
+            str(r[abn_col]).strip(),
+            str(r[product_col]).strip() if product_col else "",
+        ),
+        axis=1,
+    )
+    df = df[df["_fund_id"].notna()]
+
+    # Take only the latest quarter per fund
+    latest_qtr = df.groupby("_fund_id")["_period"].max().reset_index()
+    latest_qtr.columns = ["_fund_id", "_latest_period"]
+    df = df.merge(latest_qtr, on="_fund_id")
+    df = df[df["_period"] == df["_latest_period"]]
+
+    print(f"  Processing {len(df)} sector rows for {df['_fund_id'].nunique()} funds (latest quarter each).")
 
     alloc_fields = [
         "australian_equities", "international_equities", "property",
         "infrastructure", "private_equity", "alternatives", "fixed_income", "cash",
     ]
 
-    seen_funds: set[str] = set()
     rows_to_upsert = []
+    for fund_id, group in df.groupby("_fund_id"):
+        alloc_data: dict = {f: 0.0 for f in alloc_fields}
 
-    for _, row in df.iterrows():
-        abn_val = str(row[abn_col]).strip()
-        product_val = str(row[product_col]).strip() if product_col else ""
-        fund_id = match_fund_id(abn_val, product_val)
-        if fund_id is None or fund_id in seen_funds:
+        for _, row in group.iterrows():
+            sector_val = str(row[sector_col]) if not pd.isna(row[sector_col]) else ""
+            domicile_val = str(row[domicile_col]) if domicile_col and not pd.isna(row.get(domicile_col)) else ""
+            pct = float(row[alloc_col]) if not pd.isna(row[alloc_col]) else 0.0
+
+            if pct <= 1:
+                pct *= 100
+
+            db_col = classify_sector(sector_val, domicile_val)
+            if db_col and db_col in alloc_data:
+                alloc_data[db_col] += pct
+
+        total = sum(alloc_data.values())
+        if total < 1:
             continue
 
-        alloc_data: dict = {"fund_id": fund_id, "source": "APRA QSPS Historical SAA"}
-        has_any = False
-        for field in alloc_fields:
-            resolved_col = cols.get(field)
-            if resolved_col is None:
-                alloc_data[field] = None
-                continue
-            val = row.get(resolved_col)
-            if pd.isna(val):
-                alloc_data[field] = None
-            else:
-                pct = float(val)
-                if pct <= 1:
-                    pct *= 100
-                alloc_data[field] = round(pct, 2)
-                has_any = True
-
-        if has_any:
-            rows_to_upsert.append(alloc_data)
-            seen_funds.add(fund_id)
+        row_out = {"fund_id": fund_id, "source": "APRA QSPS Historical SAA"}
+        for f in alloc_fields:
+            row_out[f] = round(alloc_data[f], 2) if alloc_data[f] > 0 else None
+        rows_to_upsert.append(row_out)
 
     print(f"  Prepared {len(rows_to_upsert)} allocation rows for upsert.")
 
@@ -383,13 +417,6 @@ def ingest_historical_saa(sb, csv_path: str | None = None) -> int:
         rows=len(rows_to_upsert), source_date=date.today(), started_at=started_at,
     )
     return len(rows_to_upsert)
-
-
-# ─────────────────────────────────────────────────────────────
-#  QSPS Tables 4-11 -> super_fund_fees (optional, future)
-# ─────────────────────────────────────────────────────────────
-# The fee data comes from the Tables 4-11 ZIP which contains multiple CSVs.
-# For now fees are seeded from research CSVs; this can be extended later.
 
 
 # ─────────────────────────────────────────────────────────────
