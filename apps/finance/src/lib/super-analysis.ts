@@ -9,6 +9,60 @@ import type {
 	WhatIfPoint,
 } from "./super-types";
 
+// ── Fee Helpers ─────────────────────────────────────────────
+
+export function totalFeeOnBalance(fee: FundFee, balance: number): number {
+	let pct = fee.admin_fee_pct + fee.investment_fee_pct;
+	if (fee.performance_fee_pct) pct += fee.performance_fee_pct;
+	if (fee.transaction_cost_pct) pct += fee.transaction_cost_pct;
+	return balance * (pct / 100) + fee.admin_fee_flat;
+}
+
+export function totalFeePct(fee: FundFee): number {
+	let pct = fee.admin_fee_pct + fee.investment_fee_pct;
+	if (fee.performance_fee_pct) pct += fee.performance_fee_pct;
+	if (fee.transaction_cost_pct) pct += fee.transaction_cost_pct;
+	return pct;
+}
+
+/**
+ * Port of fee_drag_over_time() from Python.
+ *
+ * Calculate cumulative fee drag for each fund over N years.
+ * Returns array of { year, fundId1: cumFees, fundId2: cumFees, ... }
+ */
+export function feeDragOverTime(
+	fees: FundFee[],
+	balance: number,
+	annualReturnPct: number,
+	years: number,
+): Record<string, number>[] {
+	const result: Record<string, number>[] = [];
+	const balances: Record<string, number> = {};
+	const cumFees: Record<string, number> = {};
+
+	for (const f of fees) {
+		balances[f.fund_id] = balance;
+		cumFees[f.fund_id] = 0;
+	}
+
+	for (let y = 1; y <= years; y++) {
+		const point: Record<string, number> = { year: y };
+
+		for (const f of fees) {
+			const bal = balances[f.fund_id]!;
+			const annualFee = totalFeeOnBalance(f, bal);
+			cumFees[f.fund_id] = (cumFees[f.fund_id] ?? 0) + annualFee;
+			point[f.fund_id] = Math.round(cumFees[f.fund_id]!);
+			balances[f.fund_id] = bal * (1 + annualReturnPct / 100) - annualFee;
+		}
+
+		result.push(point);
+	}
+
+	return result;
+}
+
 // ── Helpers ────────────────────────────────────────────────
 
 function dateToQuarterKey(d: Date): string {
