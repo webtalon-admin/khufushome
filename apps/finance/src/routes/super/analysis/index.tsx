@@ -1,7 +1,7 @@
 import { Button, Card, CardContent } from "@khufushome/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays, Pencil, Plus, Trash2 } from "lucide-react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { AlertCircle, CalendarDays, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { SnapshotFormDialog } from "../../../components/super/SnapshotFormDialog";
 import { SuperNav } from "../../../components/super/SuperNav";
@@ -9,6 +9,7 @@ import {
 	createSnapshot,
 	deleteSnapshot,
 	fetchSnapshots,
+	fetchSuperAccounts,
 	updateSnapshot,
 } from "../../../lib/super-api";
 import type {
@@ -20,8 +21,6 @@ import type {
 export const Route = createFileRoute("/super/analysis/")({
 	component: SuperAnalysisOverviewPage,
 });
-
-const TEMP_SUPER_ACCOUNT_ID = "00000000-0000-0000-0000-000000000001";
 
 function fmtCurrency(n: number | null | undefined): string {
 	if (n == null) return "—";
@@ -59,6 +58,13 @@ function SuperAnalysisOverviewPage() {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingSnapshot, setEditingSnapshot] =
 		useState<BalanceSnapshot | null>(null);
+
+	const { data: accounts = [] } = useQuery({
+		queryKey: ["super-accounts"],
+		queryFn: fetchSuperAccounts,
+	});
+	const activeAccount = accounts.find((a) => a.is_active);
+	const activeAccountId = activeAccount?.id ?? null;
 
 	const { data: snapshots = [], isLoading } = useQuery({
 		queryKey: ["super-snapshots"],
@@ -148,11 +154,28 @@ function SuperAnalysisOverviewPage() {
 						Current balance, quarterly snapshots, and contributions summary.
 					</p>
 				</div>
-				<Button size="sm" onClick={handleOpenCreate}>
+				<Button size="sm" onClick={handleOpenCreate} disabled={!activeAccountId}>
 					<Plus className="mr-1.5 size-4" />
 					New Snapshot
 				</Button>
 			</div>
+
+			{!activeAccountId && (
+				<Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+					<CardContent className="flex items-center gap-3 p-4">
+						<AlertCircle className="size-5 shrink-0 text-amber-600" />
+						<div className="text-sm">
+							<p className="font-medium text-foreground">No active super account</p>
+							<p className="text-muted-foreground">
+								<Link to="/super" className="text-primary hover:underline">
+									Add a super fund account
+								</Link>{" "}
+								to start tracking snapshots.
+							</p>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 
 			{latest && (
 				<div className="grid gap-4 sm:grid-cols-3">
@@ -309,7 +332,7 @@ function SuperAnalysisOverviewPage() {
 				open={dialogOpen}
 				onOpenChange={setDialogOpen}
 				snapshot={editingSnapshot}
-				superAccountId={TEMP_SUPER_ACCOUNT_ID}
+				superAccountId={activeAccountId ?? ""}
 				latestSnapshotDate={latestSnapshotDate}
 				onSubmit={handleSubmit}
 				isPending={createMut.isPending || updateMut.isPending}

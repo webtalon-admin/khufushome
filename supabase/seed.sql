@@ -93,13 +93,14 @@ where id = 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e';
 -- 3. Super account + quarterly balance snapshots
 -- ──────────────────────────────────────────────
 -- Create a super account for the admin user (Future Super)
-insert into public.accounts (id, user_id, name, type, institution, metadata) values (
+insert into public.accounts (id, user_id, name, type, institution, is_active, metadata) values (
   '00000000-0000-0000-0000-000000000001',
   'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
-  'Future Super – Sustainable Growth',
+  'Future Super – Balanced Growth',
   'super',
   'Future Super',
-  '{"fund_id": "future_super", "member_number": "000000"}'
+  true,
+  '{"fund_name": "Future Super", "investment_option": "Balanced Growth", "member_number": "000000"}'
 );
 
 -- Quarterly balance snapshots from research data (Oct 2020 – Mar 2025).
