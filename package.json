@@ -19,7 +19,8 @@
     "db:migrate": "supabase migration new",
     "db:status": "supabase status",
     "pipeline:seed": "uv run --project scripts/super-pipeline python scripts/super-pipeline/seed.py",
-    "pipeline:apra": "uv run --project scripts/super-pipeline python scripts/super-pipeline/ingest_apra.py"
+    "pipeline:apra": "uv run --project scripts/super-pipeline python scripts/super-pipeline/ingest_apra.py",
+    "pipeline:yoursuper": "supabase functions invoke yoursuper-refresh"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
