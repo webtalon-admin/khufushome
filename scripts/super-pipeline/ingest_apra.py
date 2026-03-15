@@ -280,12 +280,19 @@ def ingest_historical_performance(sb, csv_path: str | None = None) -> int:
     # Also store individual quarterly return rows for the what-if engine
     df["_quarter"] = df["_period"].apply(period_to_quarter_label)
     quarterly_rows = []
+    seen_quarters: set[tuple[str, str]] = set()
     for _, row in df.iterrows():
         qr_pct = float(row[ret_col]) * 100  # convert decimal to percentage
+        if abs(qr_pct) > 999:
+            continue
+        key = (row["_fund_id"], row["_quarter"])
+        if key in seen_quarters:
+            continue
+        seen_quarters.add(key)
         quarterly_rows.append({
             "fund_id": row["_fund_id"],
             "fy": row["_quarter"],
-            "return_pct": round(qr_pct, 4),
+            "return_pct": round(qr_pct, 2),
             "return_type": "quarterly_net",
             "source": "APRA QSPS (raw quarterly)",
         })
