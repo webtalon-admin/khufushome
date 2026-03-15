@@ -243,3 +243,45 @@ values
   ('00000000-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
    'employer_sg', 4823.85, '2025-12-31', '2025-2026', null)
 ;
+
+-- ──────────────────────────────────────────────
+-- 5. Super fund reference data (tracked funds)
+-- ──────────────────────────────────────────────
+-- These are the funds available in the "Compare Funds" selector on the
+-- Historical Performance page. Must exist for the what-if engine to work.
+-- In production, also populated/updated by `pnpm pipeline:seed`.
+insert into public.super_fund_reference
+  (id, name, option_name, fund_type, aum_billions, members, return_target, growth_defensive_split, website, notes)
+values
+  ('future_super', 'Future Super', 'Sustainable Growth', 'retail', 2.2, 55000,
+   'CPI + 3.0%', '{"growth": 85, "defensive": 15}', 'https://www.futuresuper.com.au',
+   'Ethical screens exclude fossil fuels, banks, weapons, tobacco, gambling.'),
+  ('australian_super', 'AustralianSuper', 'Balanced', 'industry', 389, 3500000,
+   'CPI + 3.8%', '{"growth": 70, "defensive": 30}', 'https://www.australiansuper.com',
+   'Australia''s largest super fund.'),
+  ('hostplus_balanced', 'Hostplus', 'Balanced', 'industry', 134.5, 1870000,
+   'CPI + 2.5-3.0%', '{"growth": 75, "defensive": 25}', 'https://hostplus.com.au',
+   'Very high alternatives allocation (~32%).'),
+  ('hostplus_shares_plus', 'Hostplus', 'Shares Plus', 'industry', 7.0, null,
+   null, '{"growth": 96, "defensive": 4}', 'https://hostplus.com.au',
+   'Near-100% growth assets. Zero fixed income/cash.'),
+  ('unisuper', 'UniSuper', 'Growth', 'industry', 140, 680500,
+   'CPI + 3.5%', '{"growth": 80, "defensive": 20}', 'https://www.unisuper.com.au',
+   'Significant internal management. Originally university sector.'),
+  ('art_high_growth', 'Australian Retirement Trust', 'High Growth', 'industry', 335, 2400000,
+   'CPI + 4.0%', '{"growth": 85, "defensive": 15}', 'https://www.australianretirementtrust.com.au',
+   '2nd largest fund. Formed 2022 from Sunsuper + QSuper merger.'),
+  ('aware_super', 'Aware Super', 'High Growth', 'industry', 210, 1100000,
+   'CPI + 4.0%', '{"growth": 88, "defensive": 12}', 'https://aware.com.au',
+   '3rd largest fund. Whole-of-Fund model.'),
+  ('hesta_high_growth', 'HESTA', 'High Growth', 'industry', 100, 1085000,
+   'CPI + 4.0%', '{"growth": 82, "defensive": 18}', 'https://www.hesta.com.au',
+   'Health & community services focus.'),
+  ('rest_super', 'Rest Super', 'Growth', 'industry', 99, 2000000,
+   'CPI + 3.0%', '{"growth": 77, "defensive": 23}', 'https://rest.com.au',
+   'Originally retail sector. 37-year track record.'),
+  ('vanguard_super', 'Vanguard Super', 'Growth', 'retail', 3.2, 36374,
+   'CPI + 3.25%', '{"growth": 70, "defensive": 30}', 'https://www.vanguard.com.au',
+   '100% passive/indexed. Lowest fees. Launched Oct 2022.')
+on conflict (id) do nothing
+;
