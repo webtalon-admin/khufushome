@@ -15,6 +15,7 @@ import {
 	ArrowUpRight,
 	CheckCircle2,
 	FileUp,
+	Info,
 	Loader2,
 	Upload,
 } from "lucide-react";
@@ -213,6 +214,7 @@ export function CsvImportDialog({
 
 				{/* Step 1: Upload */}
 				{step === "upload" && (
+				<div className="space-y-4">
 					<div
 						className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-10 text-center hover:border-primary/40 transition-colors cursor-pointer"
 						onDragOver={(e) => e.preventDefault()}
@@ -228,14 +230,74 @@ export function CsvImportDialog({
 						<p className="mt-1 text-xs text-muted-foreground">
 							Supports Macquarie, CommBank, Westpac, ANZ, NAB, or custom format
 						</p>
-						<input
-							id="csv-file-input"
-							type="file"
-							accept=".csv"
-							className="hidden"
-							onChange={handleFileChange}
-						/>
+					<input
+						id="csv-file-input"
+						type="file"
+						accept=".csv"
+						className="hidden"
+						onChange={handleFileChange}
+					/>
+				</div>
+
+					<div className="rounded-lg border bg-muted/20 p-4 space-y-3">
+						<div className="flex items-center gap-2">
+							<Info className="size-4 text-primary shrink-0" />
+							<p className="text-sm font-medium text-foreground">Expected CSV Format</p>
+						</div>
+						<div className="text-xs text-muted-foreground space-y-2">
+							<p>Your CSV should have a header row with at least these 3 columns:</p>
+							<div className="overflow-x-auto rounded border bg-background">
+								<table className="w-full text-xs">
+									<thead>
+										<tr className="bg-muted/40">
+											<th className="px-3 py-1.5 text-left font-semibold text-foreground">Column</th>
+											<th className="px-3 py-1.5 text-left font-semibold text-foreground">Required</th>
+											<th className="px-3 py-1.5 text-left font-semibold text-foreground">Type</th>
+											<th className="px-3 py-1.5 text-left font-semibold text-foreground">Example</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr className="border-t border-border/50">
+											<td className="px-3 py-1.5 font-medium text-foreground">Date</td>
+											<td className="px-3 py-1.5"><Badge variant="default" className="text-[10px] px-1.5 py-0">Required</Badge></td>
+											<td className="px-3 py-1.5">DD/MM/YYYY</td>
+											<td className="px-3 py-1.5 font-mono">15/03/2026</td>
+										</tr>
+										<tr className="border-t border-border/50">
+											<td className="px-3 py-1.5 font-medium text-foreground">Amount</td>
+											<td className="px-3 py-1.5"><Badge variant="default" className="text-[10px] px-1.5 py-0">Required</Badge></td>
+											<td className="px-3 py-1.5">Number (+ credit, − debit)</td>
+											<td className="px-3 py-1.5 font-mono">-45.99</td>
+										</tr>
+										<tr className="border-t border-border/50">
+											<td className="px-3 py-1.5 font-medium text-foreground">Description</td>
+											<td className="px-3 py-1.5"><Badge variant="default" className="text-[10px] px-1.5 py-0">Required</Badge></td>
+											<td className="px-3 py-1.5">Text</td>
+											<td className="px-3 py-1.5 font-mono">Woolworths Town Hall</td>
+										</tr>
+										<tr className="border-t border-border/50">
+											<td className="px-3 py-1.5 font-medium text-foreground">Balance</td>
+											<td className="px-3 py-1.5"><Badge variant="outline" className="text-[10px] px-1.5 py-0">Optional</Badge></td>
+											<td className="px-3 py-1.5">Number</td>
+											<td className="px-3 py-1.5 font-mono">1,234.56</td>
+										</tr>
+										<tr className="border-t border-border/50">
+											<td className="px-3 py-1.5 font-medium text-foreground">Category</td>
+											<td className="px-3 py-1.5"><Badge variant="outline" className="text-[10px] px-1.5 py-0">Optional</Badge></td>
+											<td className="px-3 py-1.5">Text</td>
+											<td className="px-3 py-1.5 font-mono">Groceries</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<p className="text-[11px]">
+								Column names are matched case-insensitively. If your bank uses different headers
+								(e.g., "Narrative" instead of "Description"), you can map them manually in the next step.
+								Positive amounts are treated as income, negative as expenses.
+							</p>
+						</div>
 					</div>
+				</div>
 				)}
 
 				{/* Step 2: Configure */}
