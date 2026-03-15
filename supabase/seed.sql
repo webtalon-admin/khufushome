@@ -324,3 +324,20 @@ values
   ('future_super', 'performing', 6.89, 512, 9, '2025-12-31')
 on conflict (fund_id, data_date) do nothing
 ;
+
+-- Seed fund asset allocations from research CSV data
+insert into public.super_fund_allocations
+  (fund_id, australian_equities, international_equities, property, infrastructure, private_equity, alternatives, fixed_income, cash, source)
+values
+  ('australian_super', 23.85, 30.65, 8.00, 9.25, 4.75, 0.00, 14.50, 5.00, 'PDS 1 Aug 2025'),
+  ('hostplus_balanced', 23.20, 32.20, null, null, null, 31.86, 2.88, 3.10, 'Hostplus Investment Manager Allocations'),
+  ('hostplus_shares_plus', 31.92, 39.84, null, null, null, 23.67, 0.00, 0.00, 'InvestSMART/Morningstar'),
+  ('unisuper', 32.50, 39.30, null, null, null, null, 10.90, 12.00, 'InvestSMART/Morningstar'),
+  ('art_high_growth', 32.25, 33.25, null, null, null, 31.50, 1.00, 2.00, 'australianretirementtrust.com.au'),
+  ('aware_super', 28.50, 38.50, 7.00, 11.50, 7.00, 0.50, 3.00, 4.00, 'aware.com.au Sep 2025'),
+  ('hesta_high_growth', 32.00, 31.50, 7.00, 10.00, 8.00, 2.00, 4.50, 5.00, 'HESTA PDS Sep 2025'),
+  ('rest_super', 23.50, 35.00, 9.00, 11.00, null, 2.50, 14.50, 4.50, 'rest.com.au Sep 2024'),
+  ('vanguard_super', 28.00, 42.00, 0.00, 0.00, 0.00, 0.00, 30.00, 0.00, 'Vanguard PDS Oct 2025'),
+  ('future_super', 15.00, 40.50, 3.70, null, null, 10.80, 25.00, 5.00, 'Estimated from 85/15 growth/defensive split')
+on conflict (fund_id) do nothing
+;
