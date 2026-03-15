@@ -7,11 +7,105 @@ import type {
 	FundFee,
 	FundReference,
 	FundReturn,
+	FundSwitch,
+	FundSwitchInsert,
 	PipelineLog,
+	SuperAccount,
+	SuperAccountInsert,
 } from "./super-types";
 
 function supabase() {
 	return getSupabaseClient();
+}
+
+// ── Super Accounts ────────────────────────────────────────
+
+export async function fetchSuperAccounts(): Promise<SuperAccount[]> {
+	const { data, error } = await supabase()
+		.from("accounts")
+		.select("*")
+		.eq("type", "super")
+		.order("is_active", { ascending: false })
+		.order("created_at", { ascending: true });
+
+	if (error) throw error;
+	return data as SuperAccount[];
+}
+
+export async function createSuperAccount(
+	input: SuperAccountInsert,
+): Promise<SuperAccount> {
+	const {
+		data: { user },
+	} = await supabase().auth.getUser();
+	if (!user) throw new Error("Not authenticated");
+
+	const { data, error } = await supabase()
+		.from("accounts")
+		.insert({
+			user_id: user.id,
+			name: input.name,
+			type: "super",
+			institution: input.institution ?? input.metadata.fund_name,
+			is_active: true,
+			metadata: input.metadata,
+		})
+		.select()
+		.single();
+
+	if (error) throw error;
+	return data as SuperAccount;
+}
+
+export async function updateSuperAccount(
+	id: string,
+	input: Partial<SuperAccountInsert> & { is_active?: boolean },
+): Promise<SuperAccount> {
+	const updates: Record<string, unknown> = {};
+	if (input.name !== undefined) updates.name = input.name;
+	if (input.institution !== undefined) updates.institution = input.institution;
+	if (input.metadata !== undefined) updates.metadata = input.metadata;
+	if (input.is_active !== undefined) updates.is_active = input.is_active;
+
+	const { data, error } = await supabase()
+		.from("accounts")
+		.update(updates)
+		.eq("id", id)
+		.select()
+		.single();
+
+	if (error) throw error;
+	return data as SuperAccount;
+}
+
+// ── Fund Switches ─────────────────────────────────────────
+
+export async function fetchFundSwitches(): Promise<FundSwitch[]> {
+	const { data, error } = await supabase()
+		.from("super_fund_switches")
+		.select("*")
+		.order("switch_date", { ascending: false });
+
+	if (error) throw error;
+	return data as FundSwitch[];
+}
+
+export async function createFundSwitch(
+	input: FundSwitchInsert,
+): Promise<FundSwitch> {
+	const {
+		data: { user },
+	} = await supabase().auth.getUser();
+	if (!user) throw new Error("Not authenticated");
+
+	const { data, error } = await supabase()
+		.from("super_fund_switches")
+		.insert({ ...input, user_id: user.id })
+		.select()
+		.single();
+
+	if (error) throw error;
+	return data as FundSwitch;
 }
 
 // ── Balance Snapshots ──────────────────────────────────────

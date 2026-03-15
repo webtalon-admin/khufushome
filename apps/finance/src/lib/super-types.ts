@@ -74,6 +74,53 @@ export const SMSF_DEFAULTS = {
 	exchangeFeePct: 0.005,
 } as const;
 
+// ── Super Accounts ────────────────────────────────────────
+
+export interface SuperAccountMetadata {
+	fund_name: string;
+	member_number?: string;
+	investment_option?: string;
+	insurance_premiums_monthly?: number;
+	admin_fee_monthly?: number;
+}
+
+export interface SuperAccount {
+	id: string;
+	user_id: string;
+	name: string;
+	type: "super";
+	institution: string | null;
+	is_active: boolean;
+	metadata: SuperAccountMetadata;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface SuperAccountInsert {
+	name: string;
+	institution?: string;
+	metadata: SuperAccountMetadata;
+}
+
+export interface FundSwitch {
+	id: string;
+	user_id: string;
+	from_account_id: string | null;
+	to_account_id: string;
+	switch_date: string;
+	reason: string | null;
+	balance_at_switch: number | null;
+	created_at: string;
+}
+
+export interface FundSwitchInsert {
+	from_account_id: string | null;
+	to_account_id: string;
+	switch_date: string;
+	reason?: string;
+	balance_at_switch?: number;
+}
+
 export interface PipelineLog {
 	id: string;
 	pipeline: string;
