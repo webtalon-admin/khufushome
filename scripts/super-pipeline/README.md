@@ -4,12 +4,18 @@ Automated refresh of superannuation reference data from free government sources.
 
 ## Setup
 
+Requires [uv](https://docs.astral.sh/uv/) (fast Python package manager).
+
 ```bash
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Sync dependencies (creates .venv automatically)
 cd scripts/super-pipeline
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
 ```
+
+No manual venv activation needed — `uv run` handles it automatically.
 
 ## Environment Variables
 
@@ -27,7 +33,8 @@ For production, use the Supabase project URL and the service role key from the d
 Import data from `research/super-research/` CSVs into Supabase:
 
 ```bash
-python seed.py
+cd scripts/super-pipeline
+uv run python seed.py
 ```
 
 ### APRA Ingestion (quarterly)
@@ -35,11 +42,11 @@ python seed.py
 Download APRA Historical Performance + SAA CSVs, filter for tracked funds, upsert:
 
 ```bash
-python ingest_apra.py              # download from APRA + ingest
-python ingest_apra.py --seed       # seed first, then APRA data
-python ingest_apra.py --inspect    # download and print CSV column structure (no DB writes)
-python ingest_apra.py --local-perf /path/to/perf.csv   # use local file instead of downloading
-python ingest_apra.py --local-saa /path/to/saa.csv     # use local SAA file
+uv run python ingest_apra.py              # download from APRA + ingest
+uv run python ingest_apra.py --seed       # seed first, then APRA data
+uv run python ingest_apra.py --inspect    # download and print CSV column structure (no DB writes)
+uv run python ingest_apra.py --local-perf /path/to/perf.csv   # use local file instead of downloading
+uv run python ingest_apra.py --local-saa /path/to/saa.csv     # use local SAA file
 ```
 
 ### Via pnpm (from repo root)
@@ -49,13 +56,15 @@ pnpm run pipeline:seed
 pnpm run pipeline:apra
 ```
 
+These use `uv run --project scripts/super-pipeline` under the hood.
+
 ## Inspect Mode
 
 On first run or when APRA changes their CSV format, use `--inspect` to see the actual
 column names without writing to the database:
 
 ```bash
-python ingest_apra.py --inspect
+uv run python ingest_apra.py --inspect
 ```
 
 This downloads the CSVs, prints all column names with indices, shows the first 3 rows,

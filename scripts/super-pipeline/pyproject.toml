@@ -1,0 +1,14 @@
+[project]
+name = "super-pipeline"
+version = "0.1.0"
+description = "Superannuation data pipeline — APRA CSV ingestion and seed scripts"
+requires-python = ">=3.11"
+dependencies = [
+    "supabase>=2.0.0",
+    "pandas>=2.2.0",
+    "requests>=2.32.0",
+]
+
+[project.scripts]
+seed = "seed:main"
+ingest-apra = "ingest_apra:main"

@@ -18,8 +18,8 @@
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration new",
     "db:status": "supabase status",
-    "pipeline:seed": "cd scripts/super-pipeline && python seed.py",
-    "pipeline:apra": "cd scripts/super-pipeline && python ingest_apra.py"
+    "pipeline:seed": "uv run --project scripts/super-pipeline python scripts/super-pipeline/seed.py",
+    "pipeline:apra": "uv run --project scripts/super-pipeline python scripts/super-pipeline/ingest_apra.py"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
