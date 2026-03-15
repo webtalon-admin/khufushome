@@ -4,6 +4,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowRightLeft,
 	BarChart3,
+	BookOpen,
 	Calculator,
 	CheckCircle2,
 	FileText,
@@ -69,6 +70,12 @@ const sections = [
 		description: "Admin, investment, and total fee comparison.",
 		to: "/super/research/fees",
 		icon: Calculator,
+	},
+	{
+		title: "Research — Papers",
+		description: "In-depth research papers for each tracked fund.",
+		to: "/super/research/papers",
+		icon: BookOpen,
 	},
 ] as const;
 

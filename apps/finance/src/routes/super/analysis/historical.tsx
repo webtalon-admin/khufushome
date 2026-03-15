@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { SuperNav } from "../../../components/super/SuperNav";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	CartesianGrid,
 	Legend,
@@ -85,10 +85,9 @@ function findClosestDate(target: string, dates: Set<string>): string | null {
 const SWITCH_COLOURS = ["#e11d48", "#7c3aed", "#0891b2", "#c2410c"];
 
 function SuperHistoricalPage() {
-	const [selectedFunds, setSelectedFunds] = useState<Set<string>>(
-		new Set(["australian_super", "hostplus_balanced", "vanguard_super"]),
-	);
-	const [showSmsfBtc, setShowSmsfBtc] = useState(true);
+	const [selectedFunds, setSelectedFunds] = useState<Set<string>>(new Set());
+	const fundsInitialised = useRef(false);
+	const [showSmsfBtc, setShowSmsfBtc] = useState(false);
 	const [showAssumptions, setShowAssumptions] = useState(false);
 	const [smsfAnnualCost, setSmsfAnnualCost] = useState<number>(
 		SMSF_DEFAULTS.annualCost,
@@ -131,6 +130,23 @@ function SuperHistoricalPage() {
 		queryKey: ["super-accounts"],
 		queryFn: fetchSuperAccounts,
 	});
+
+	// Select all funds by default (except SMSF) once loaded
+	useEffect(() => {
+		if (fundsInitialised.current || fundRefs.length === 0) return;
+		fundsInitialised.current = true;
+		setSelectedFunds(new Set(fundRefs.map((r) => r.id)));
+	}, [fundRefs]);
+
+	const allFundsSelected = fundRefs.length > 0 && fundRefs.every((r) => selectedFunds.has(r.id));
+
+	const toggleAll = () => {
+		if (allFundsSelected) {
+			setSelectedFunds(new Set());
+		} else {
+			setSelectedFunds(new Set(fundRefs.map((r) => r.id)));
+		}
+	};
 
 	const activeFundIds = useMemo(
 		() => Array.from(selectedFunds),
@@ -279,7 +295,9 @@ function SuperHistoricalPage() {
 															year: "numeric",
 														})}
 													</p>
-													{payload.map((entry) => (
+													{[...payload]
+													.sort((a, b) => Number(b.value) - Number(a.value))
+													.map((entry) => (
 														<div
 															key={entry.dataKey as string}
 															className="flex items-center justify-between gap-4 text-xs"
@@ -406,9 +424,18 @@ function SuperHistoricalPage() {
 					<div className="grid gap-4 lg:grid-cols-2">
 						<Card>
 							<CardContent className="p-5">
-								<h3 className="text-sm font-semibold text-foreground mb-3">
-									Compare Funds
-								</h3>
+								<div className="flex items-center justify-between mb-3">
+									<h3 className="text-sm font-semibold text-foreground">
+										Compare Funds
+									</h3>
+									<button
+										type="button"
+										className="text-xs font-medium text-primary hover:underline"
+										onClick={toggleAll}
+									>
+										{allFundsSelected ? "Deselect All" : "Select All"}
+									</button>
+								</div>
 								<div className="space-y-2">
 									{fundRefs.map((ref) => (
 										<label

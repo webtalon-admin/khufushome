@@ -64,8 +64,23 @@ function AllocationsPage() {
 		"stacked",
 	);
 
-	const stackedData = useMemo(() => {
+	const normalised = useMemo(() => {
 		return allocations.map((a) => {
+			let total = 0;
+			for (const cls of ASSET_CLASSES) total += a[cls] ?? 0;
+			const scale = total > 110 ? 100 / total : 1;
+			const out = { ...a };
+			for (const cls of ASSET_CLASSES) {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				(out as any)[cls] =
+					a[cls] != null ? Math.round(a[cls]! * scale * 100) / 100 : null;
+			}
+			return out;
+		});
+	}, [allocations]);
+
+	const stackedData = useMemo(() => {
+		return normalised.map((a) => {
 			const row: Record<string, string | number> = {
 				fundId: a.fund_id,
 				name: fundShortLabel(a.fund_id, fundRefs),
@@ -75,10 +90,10 @@ function AllocationsPage() {
 			}
 			return row;
 		});
-	}, [allocations, fundRefs]);
+	}, [normalised, fundRefs]);
 
 	const growthDefensiveData = useMemo(() => {
-		return allocations.map((a) => {
+		return normalised.map((a) => {
 			let growth = 0;
 			let defensive = 0;
 			for (const cls of GROWTH_ASSETS) {
@@ -94,7 +109,7 @@ function AllocationsPage() {
 				Defensive: Math.round(defensive * 10) / 10,
 			};
 		}).sort((a, b) => b.Growth - a.Growth);
-	}, [allocations, fundRefs]);
+	}, [normalised, fundRefs]);
 
 	return (
 		<div className="space-y-6">
@@ -181,7 +196,9 @@ function AllocationsPage() {
 									<XAxis
 										type="number"
 										domain={[0, 100]}
-										tickFormatter={(v: number) => `${v}%`}
+										allowDataOverflow
+										ticks={[0, 20, 40, 60, 80, 100]}
+										tickFormatter={(v: number) => `${Math.round(v)}%`}
 										className="text-xs"
 									/>
 									<YAxis
@@ -276,7 +293,7 @@ function AllocationsPage() {
 										</tr>
 									</thead>
 									<tbody>
-										{allocations.map((a) => {
+										{normalised.map((a) => {
 											const total = ASSET_CLASSES.reduce(
 												(sum, cls) => sum + (a[cls] ?? 0),
 												0,
@@ -335,7 +352,9 @@ function AllocationsPage() {
 									<XAxis
 										type="number"
 										domain={[0, 100]}
-										tickFormatter={(v: number) => `${v}%`}
+										allowDataOverflow
+										ticks={[0, 20, 40, 60, 80, 100]}
+										tickFormatter={(v: number) => `${Math.round(v)}%`}
 										className="text-xs"
 									/>
 									<YAxis
