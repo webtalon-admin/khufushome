@@ -19,7 +19,7 @@ import {
 	fetchFundAllocations,
 	fetchFundReferences,
 } from "../../../lib/super-api";
-import type { FundAllocation, FundReference } from "../../../lib/super-types";
+import type { FundReference } from "../../../lib/super-types";
 import {
 	ASSET_CLASSES,
 	ASSET_CLASS_LABELS,
