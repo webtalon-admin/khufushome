@@ -188,6 +188,26 @@ export interface ContributionInsert {
 
 export type ContributionUpdate = Partial<Omit<ContributionInsert, "super_account_id">>;
 
+// ── Projections ──────────────────────────────────────────
+
+export interface ProjectionYear {
+	year: number;
+	age: number;
+	balance: number;
+	contribution: number;
+	grossReturn: number;
+	fee: number;
+	netReturn: number;
+}
+
+export interface ProjectionInput {
+	fundId: string;
+	label: string;
+	annualReturnPct: number;
+	feePct: number;
+	feeFlat: number;
+}
+
 export interface PipelineLog {
 	id: string;
 	pipeline: string;
