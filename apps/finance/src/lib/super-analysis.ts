@@ -3,6 +3,8 @@ import type {
 	BtcPriceMonthly,
 	FundFee,
 	FundReturn,
+	ProjectionInput,
+	ProjectionYear,
 	SmsfBtcResult,
 	WhatIfPoint,
 } from "./super-types";
@@ -276,4 +278,102 @@ export function smsfBtcWhatIf(
 		currentAudValue,
 		currentBtcPrice: latestPrice,
 	};
+}
+
+// ── Balance Projection ────────────────────────────────────
+
+export interface ProjectionConfig {
+	startingBalance: number;
+	annualContribution: number;
+	salaryGrowthRate: number;
+	sgRate: number;
+	voluntaryAnnual: number;
+	currentAge: number;
+	retirementAge: number;
+}
+
+/**
+ * Port of project_balance() from Python.
+ *
+ * Projects the super balance forward year-by-year for a single fund,
+ * applying that fund's assumed return rate and fee structure.
+ * Salary grows each year, adjusting employer SG contributions.
+ */
+export function projectBalance(
+	config: ProjectionConfig,
+	fund: ProjectionInput,
+): ProjectionYear[] {
+	const years = config.retirementAge - config.currentAge;
+	if (years <= 0) return [];
+
+	const rows: ProjectionYear[] = [];
+	let balance = config.startingBalance;
+	let contribution = config.annualContribution;
+
+	for (let y = 1; y <= years; y++) {
+		const grossReturn = balance * (fund.annualReturnPct / 100);
+		const fee = (balance * fund.feePct) / 100 + fund.feeFlat;
+		const netReturn = grossReturn - fee;
+		balance = balance + netReturn + contribution;
+
+		rows.push({
+			year: y,
+			age: config.currentAge + y,
+			balance: Math.round(balance),
+			contribution: Math.round(contribution),
+			grossReturn: Math.round(grossReturn),
+			fee: Math.round(fee),
+			netReturn: Math.round(netReturn),
+		});
+
+		const baseSalary =
+			config.sgRate > 0 ? contribution / config.sgRate : 0;
+		const grownSalary = baseSalary * (1 + config.salaryGrowthRate);
+		contribution = grownSalary * config.sgRate + config.voluntaryAnnual;
+	}
+
+	return rows;
+}
+
+/**
+ * Run projections for multiple funds and merge into chart-friendly data.
+ * Returns an array of { year, age, fund1: balance, fund2: balance, ... }
+ */
+export function multiProjection(
+	config: ProjectionConfig,
+	funds: ProjectionInput[],
+): Record<string, number>[] {
+	if (funds.length === 0) return [];
+
+	const allSeries = funds.map((f) => ({
+		id: f.fundId,
+		rows: projectBalance(config, f),
+	}));
+
+	const years = config.retirementAge - config.currentAge;
+	const merged: Record<string, number>[] = [];
+
+	// Year 0 (today)
+	const y0: Record<string, number> = {
+		year: 0,
+		age: config.currentAge,
+	};
+	for (const f of funds) {
+		y0[f.fundId] = config.startingBalance;
+	}
+	merged.push(y0);
+
+	for (let y = 0; y < years; y++) {
+		const point: Record<string, number> = {
+			year: y + 1,
+			age: config.currentAge + y + 1,
+		};
+		for (const s of allSeries) {
+			const row = s.rows[y];
+			if (row) point[s.id] = row.balance;
+		}
+		merged.push(point);
+	}
+
+	return merged;
 }
